@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">LLMVF organization logo</title>
+  <desc id="desc">Dark L slash monogram on an acid green background</desc>
+  <rect width="1024" height="1024" rx="192" fill="#77f2a7"/>
+  <path d="M240 256h128v384h144v128H240z" fill="#07110f"/>
+  <path d="M744 256h112L664 768H552z" fill="#07110f"/>
+</svg>

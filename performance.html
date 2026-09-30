@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LLMVF 실험 성과와 핵심 지표를 한눈에 확인합니다." />
+    <meta name="theme-color" content="#07110f" />
+    <title>성과 요약 — LLMVF</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+    <script src="dashboard.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 바로가기</a>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header scrolled" data-header>
+      <a class="brand" href="index.html" aria-label="LLMVF 홈">
+        <span class="brand-mark" aria-hidden="true">L/</span><span>LLMVF</span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="index.html">Home</a>
+        <a class="active" href="performance.html">성과 요약</a>
+        <a href="reports.html">Report</a>
+        <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="main" class="subpage">
+      <section class="page-hero reveal">
+        <div>
+          <p class="section-index">PERFORMANCE OVERVIEW</p>
+          <h1>성과를 숫자로,<br /><span>조건까지 투명하게.</span></h1>
+        </div>
+        <p>
+          공개 검증이 완료된 실험만 집계합니다. 모든 수치는 동일한 자원 조건의
+          Baseline과 LLM-Guided 실험을 기준으로 표시됩니다.
+        </p>
+      </section>
+
+      <section class="data-status reveal" data-status>
+        <span class="status-dot"></span>
+        <p>공개 데이터 확인 중</p>
+        <time data-updated>—</time>
+      </section>
+
+      <section class="summary-grid" aria-label="핵심 성과 지표" data-metrics>
+        <article class="summary-card reveal">
+          <p>검증 완료 CVE</p><strong>—</strong><span>공개 실험 데이터 준비 중</span>
+        </article>
+        <article class="summary-card reveal">
+          <p>총 대응 실험</p><strong>—</strong><span>Baseline + Guided</span>
+        </article>
+        <article class="summary-card reveal">
+          <p>표적 커버리지 향상</p><strong>—</strong><span>중앙값 기준</span>
+        </article>
+        <article class="summary-card reveal">
+          <p>최초 신호 시간 단축</p><strong>—</strong><span>중앙값 기준</span>
+        </article>
+      </section>
+
+      <section class="section compact-section">
+        <div class="section-heading reveal">
+          <p class="section-index">EXPERIMENTS</p>
+          <h2>최근 실험<br /><span>비교 결과</span></h2>
+          <p>실험 보고서가 공개되면 CVE별 핵심 결과와 통계적 유의성을 이곳에서 비교할 수 있습니다.</p>
+        </div>
+        <div class="experiment-table reveal" data-experiments>
+          <div class="table-row table-head"><span>대상</span><span>재현</span><span>커버리지 Δ</span><span>효과 크기</span><span>상태</span></div>
+          <div class="empty-state">아직 공개된 실험 결과가 없습니다.</div>
+        </div>
+      </section>
+
+      <section class="method-note reveal">
+        <span>DATA POLICY</span>
+        <p>비공개 저장소의 원시 결과는 직접 노출하지 않습니다. 재현성과 공개 검토가 확인된 요약 지표만 이 페이지에 게시합니다.</p>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="index.html"><span class="brand-mark">L/</span><span>LLMVF</span></a>
+      <p>LLM 기반 변종 취약점 분석 프레임워크</p>
+      <p>© <span data-year></span> LLMVF Research</p>
+    </footer>
+  </body>
+</html>

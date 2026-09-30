@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LLMVF의 공개 실험 보고서와 연구 기록을 확인합니다." />
+    <meta name="theme-color" content="#07110f" />
+    <title>Report — LLMVF</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+    <script src="dashboard.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 바로가기</a>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header scrolled" data-header>
+      <a class="brand" href="index.html" aria-label="LLMVF 홈">
+        <span class="brand-mark" aria-hidden="true">L/</span><span>LLMVF</span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="index.html">Home</a>
+        <a href="performance.html">성과 요약</a>
+        <a class="active" href="reports.html">Report</a>
+        <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="main" class="subpage">
+      <section class="page-hero reveal">
+        <div>
+          <p class="section-index">RESEARCH REPORTS</p>
+          <h1>결론보다 먼저,<br /><span>근거를 공개합니다.</span></h1>
+        </div>
+        <p>
+          환경 검증, 실험 설계, 통계 결과와 한계를 함께 기록합니다.
+          새로운 공개 보고서는 이 목록에 자동으로 추가됩니다.
+        </p>
+      </section>
+
+      <section class="report-toolbar reveal">
+        <div><span class="status-dot"></span><strong>공개 보고서</strong></div>
+        <p><span data-report-count>0</span>개 게시됨</p>
+      </section>
+
+      <section class="report-list" data-reports aria-live="polite">
+        <article class="report-empty reveal">
+          <span>NO PUBLIC REPORTS YET</span>
+          <h2>첫 번째 검증 보고서를 준비하고 있습니다.</h2>
+          <p>보고서가 게시되면 실험 대상, 실행일, 핵심 결과와 원문 링크가 여기에 표시됩니다.</p>
+        </article>
+      </section>
+
+      <section class="report-schema reveal">
+        <p class="section-index">REPORT CONTENTS</p>
+        <div><span>01</span><p>환경 및 버전 검증</p></div>
+        <div><span>02</span><p>Baseline / Guided 실험 설계</p></div>
+        <div><span>03</span><p>커버리지·충돌·재현 통계</p></div>
+        <div><span>04</span><p>해석, 한계와 재현 절차</p></div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="index.html"><span class="brand-mark">L/</span><span>LLMVF</span></a>
+      <p>LLM 기반 변종 취약점 분석 프레임워크</p>
+      <p>© <span data-year></span> LLMVF Research</p>
+    </footer>
+  </body>
+</html>
