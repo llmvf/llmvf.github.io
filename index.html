@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="LLMVF는 LLM 기반 취약점 변종 분석과 커버리지 기반 퍼징을 결합한 보안 연구 프레임워크입니다."
+    />
+    <meta name="theme-color" content="#07110f" />
+    <meta property="og:title" content="LLMVF — LLM 기반 변종 취약점 퍼징" />
+    <meta
+      property="og:description"
+      content="취약점 근거를 측정 가능한 퍼징 전략으로 전환합니다."
+    />
+    <meta property="og:type" content="website" />
+    <title>LLMVF — LLM 기반 변종 취약점 퍼징</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 바로가기</a>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="LLMVF 홈">
+        <span class="brand-mark" aria-hidden="true">L/</span>
+        <span>LLMVF</span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="#method">연구 방법</a>
+        <a href="#metrics">평가 지표</a>
+        <a href="#principles">연구 원칙</a>
+        <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span class="status-dot"></span> 보안 연구 프레임워크</p>
+          <h1>패치가 놓친<br /><em>변종</em>을 찾습니다.</h1>
+          <p class="hero-lede">
+            LLMVF는 취약점 근거를 표적 퍼징 지침으로 변환하고,
+            그 지침이 동일 조건의 기준 실험보다 실제로 나은지 측정합니다.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#method">연구 방법 살펴보기</a>
+            <a class="button button-ghost" href="https://github.com/llmvf">GitHub 조직 보기 ↗</a>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="취약점 분석 파이프라인 애니메이션">
+          <div class="terminal-bar">
+            <span></span><span></span><span></span>
+            <p>variant-analysis / 실행 중</p>
+          </div>
+          <div class="signal-grid">
+            <div class="signal-line line-a"></div>
+            <div class="signal-line line-b"></div>
+            <div class="signal-line line-c"></div>
+            <div class="node node-source"><span>01</span>취약점<br />근거</div>
+            <div class="node node-model"><span>02</span>LLM<br />분석</div>
+            <div class="node node-fuzz"><span>03</span>표적<br />퍼징</div>
+            <div class="pulse-ring"></div>
+          </div>
+          <div class="terminal-footer">
+            <span>target_coverage</span>
+            <strong data-counter="87">0</strong><span>%</span>
+            <div class="meter"><i></i></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="statement reveal" aria-label="프로젝트 핵심 흐름">
+        <p>패치 차이</p><span>×</span><p>근본 원인</p><span>×</span><p>퍼징</p><span>→</span><p>측정 가능한 근거</p>
+      </section>
+
+      <section class="section method" id="method">
+        <div class="section-heading reveal">
+          <p class="section-index">01 / 연구 방법</p>
+          <h2>근거를 입력하고,<br /><span>실험으로 답합니다.</span></h2>
+          <p>
+            모델이 추론한 내용과 퍼저가 실행한 작업, 그리고 실험으로 입증할 수 있는 결과를
+            하나의 추적 가능한 파이프라인으로 연결합니다.
+          </p>
+        </div>
+
+        <div class="pipeline">
+          <article class="pipeline-card reveal">
+            <span class="card-number">01</span>
+            <div class="card-icon">⌁</div>
+            <h3>취약점 근거 수집</h3>
+            <p>보안 권고문, 패치 차이, PoC 메타데이터와 영향받는 리비전을 구조화합니다.</p>
+            <ul><li>CVE 기록</li><li>패치 문맥</li><li>버전 경계</li></ul>
+          </article>
+          <article class="pipeline-card reveal">
+            <span class="card-number">02</span>
+            <div class="card-icon">◇</div>
+            <h3>취약점 구조화</h3>
+            <p>근본 원인과 발생 조건을 추출하고, 인접 변종에 대한 검증 가능한 가설을 만듭니다.</p>
+            <ul><li>발생 조건 명세</li><li>변종 가설</li><li>표적 함수</li></ul>
+          </article>
+          <article class="pipeline-card reveal">
+            <span class="card-number">03</span>
+            <div class="card-icon">↯</div>
+            <h3>퍼저 유도</h3>
+            <p>가설을 Fuzzilli가 사용할 수 있는 시드, 생성기, 가중치와 템플릿으로 변환합니다.</p>
+            <ul><li>검증된 지침</li><li>대응 시드 계보</li><li>동일한 자원 예산</li></ul>
+          </article>
+          <article class="pipeline-card reveal">
+            <span class="card-number">04</span>
+            <div class="card-icon">∿</div>
+            <h3>차이 측정</h3>
+            <p>커버리지, 충돌, 재현 여부와 소요 시간을 기준으로 기본 실험과 유도 실험을 비교합니다.</p>
+            <ul><li>대응 표본 통계</li><li>효과 크기</li><li>검증 가능한 보고서</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section metrics" id="metrics">
+        <div class="metrics-copy reveal">
+          <p class="section-index">02 / 평가</p>
+          <h2>지침은 가설이고,<br /><span>근거가 결과입니다.</span></h2>
+          <p>
+            모든 유도 실험은 시간, 연산 자원, 메모리와 시드 예산이 동일한 기본 실험과
+            짝을 이룹니다. 비교가 불완전하다면 그 사실도 결과에 명확히 표시합니다.
+          </p>
+        </div>
+        <div class="metric-grid">
+          <article class="metric reveal"><strong>TF</strong><h3>표적 함수 커버리지</h3><p>취약점 분석이 지목한 코드까지 실제 실행이 도달했는지 확인합니다.</p></article>
+          <article class="metric reveal"><strong>Δt</strong><h3>최초 신호 도달 시간</h3><p>각 실험군이 관련 동작을 얼마나 빠르게 재현하거나 발견했는지 측정합니다.</p></article>
+          <article class="metric reveal"><strong>UC</strong><h3>고유 충돌</h3><p>중복을 제거한 뒤 유효한 sanitizer 시그니처가 얼마나 남았는지 셉니다.</p></article>
+          <article class="metric reveal"><strong>A₁₂</strong><h3>효과 크기</h3><p>관측된 차이가 단순한 숫자 증가를 넘어 실질적으로 의미 있는지 평가합니다.</p></article>
+        </div>
+      </section>
+
+      <section class="section principles" id="principles">
+        <div class="section-heading reveal">
+          <p class="section-index">03 / 연구 원칙</p>
+          <h2>성급한 결론에<br /><span>저항하도록 설계합니다.</span></h2>
+        </div>
+        <div class="principle-list">
+          <article class="reveal"><span>01</span><h3>시간적 분리</h3><p>미래 지향 실험에서는 패치와 PoC를 모델에 제공하지 않아 정보 누출을 줄입니다.</p></article>
+          <article class="reveal"><span>02</span><h3>공정한 비교</h3><p>기본 실험과 유도 실험은 동일한 빌드, 예산, 자원과 시드 계보를 공유합니다.</p></article>
+          <article class="reveal"><span>03</span><h3>실패가 보이는 보고</h3><p>누락된 대응쌍, 잘못된 환경과 불완전한 근거를 보고서에 명시적으로 남깁니다.</p></article>
+          <article class="reveal"><span>04</span><h3>오프라인 우선</h3><p>고비용 도구를 연결하기 전에도 시뮬레이션 백엔드로 전체 흐름을 검증할 수 있습니다.</p></article>
+        </div>
+      </section>
+
+      <section class="cta reveal">
+        <p class="section-index">연구 진행 중</p>
+        <h2>가능성 있는 변종을<br />재현 가능한 근거로.</h2>
+        <p>LLMVF는 실험적 보안 연구 프레임워크로 개발되고 있습니다.</p>
+        <a class="button button-primary" href="https://github.com/llmvf">GitHub에서 프로젝트 보기 ↗</a>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="#top"><span class="brand-mark">L/</span><span>LLMVF</span></a>
+      <p>LLM 기반 변종 취약점 분석 프레임워크</p>
+      <p>© <span data-year></span> LLMVF Research</p>
+    </footer>
+  </body>
+</html>
