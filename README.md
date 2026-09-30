@@ -7,6 +7,7 @@ Public website for the LLMVF research organization.
 **https://llmvf.github.io/**
 
 - [Home](https://llmvf.github.io/)
+- [Architecture](https://llmvf.github.io/architecture.html)
 - [성과 요약](https://llmvf.github.io/performance.html)
 - [Report](https://llmvf.github.io/reports.html)
 

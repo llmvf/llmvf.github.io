@@ -30,6 +30,7 @@
       </a>
       <nav aria-label="주요 메뉴">
         <a class="active" href="index.html">Home</a>
+        <a href="architecture.html">Architecture</a>
         <a href="performance.html">성과 요약</a>
         <a href="reports.html">Report</a>
         <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
@@ -51,24 +52,34 @@
           </div>
         </div>
 
-        <div class="hero-visual reveal" aria-label="취약점 분석 파이프라인 애니메이션">
+        <div class="hero-visual reveal" aria-label="패치에서 변종 후보를 추출하는 분석 콘솔">
           <div class="terminal-bar">
             <span></span><span></span><span></span>
-            <p>variant-analysis / 실행 중</p>
+            <p>variant-console / scanning</p>
           </div>
-          <div class="signal-grid">
-            <div class="signal-line line-a"></div>
-            <div class="signal-line line-b"></div>
-            <div class="signal-line line-c"></div>
-            <div class="node node-source"><span>01</span>취약점<br />근거</div>
-            <div class="node node-model"><span>02</span>LLM<br />분석</div>
-            <div class="node node-fuzz"><span>03</span>표적<br />퍼징</div>
-            <div class="pulse-ring"></div>
+          <div class="variant-console">
+            <div class="console-source">
+              <span>PATCH / DIFF</span>
+              <div class="code-line"><i></i><b>- map = old_shape</b></div>
+              <div class="code-line added"><i></i><b>+ check(map, guard)</b></div>
+              <div class="code-line"><i></i><b>  optimize(node)</b></div>
+              <div class="code-line dim"><i></i><b>  bailout()</b></div>
+            </div>
+            <div class="console-scan" aria-hidden="true"><i></i><span>SCAN</span></div>
+            <div class="candidate-field">
+              <span>VARIANT CANDIDATES</span>
+              <div class="candidate-matrix">
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+                <i></i><i class="active"></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i class="hit"></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="candidate-result"><strong>02</strong><p>검증할 가설</p></div>
+            </div>
           </div>
           <div class="terminal-footer">
-            <span>target_coverage</span>
-            <strong data-counter="87">0</strong><span>%</span>
-            <div class="meter"><i></i></div>
+            <span>patch → hypothesis → directive</span>
+            <strong>TRACEABLE</strong>
           </div>
         </div>
       </section>
@@ -154,59 +165,9 @@
         </div>
       </section>
 
-      <section class="section architecture" id="architecture">
-        <div class="section-heading reveal">
-          <p class="section-index">03 / ARCHITECTURE</p>
-          <h2>하나의 추론을<br /><span>다섯 겹의 검증으로.</span></h2>
-          <p>
-            각 계층의 입력과 출력이 분리되어 있어, 모델의 제안이 실제 실행과
-            측정 결과로 이어지는 전 과정을 추적할 수 있습니다.
-          </p>
-        </div>
-
-        <div class="architecture-board reveal">
-          <div class="architecture-visual">
-            <svg viewBox="0 0 720 570" role="img" aria-labelledby="architecture-title architecture-desc">
-              <title id="architecture-title">LLMVF 계층형 아키텍처</title>
-              <desc id="architecture-desc">취약점 근거부터 공개 보고서까지 이어지는 다섯 계층</desc>
-              <g class="stack-guide">
-                <path d="M82 465L330 555L578 465" />
-                <path d="M82 380L330 470L578 380" />
-                <path d="M82 295L330 385L578 295" />
-                <path d="M82 210L330 300L578 210" />
-                <path d="M82 125L330 215L578 125" />
-              </g>
-              <g class="stack-layers">
-                <polygon class="layer layer-1" points="82,440 330,350 578,440 330,530" />
-                <polygon class="layer layer-2" points="82,350 330,260 578,350 330,440" />
-                <polygon class="layer layer-3" points="82,260 330,170 578,260 330,350" />
-                <polygon class="layer layer-4" points="82,170 330,80 578,170 330,260" />
-                <polygon class="layer layer-5" points="82,80 330,10 578,80 330,170" />
-              </g>
-              <g class="stack-numbers">
-                <text x="318" y="465">01</text>
-                <text x="318" y="375">02</text>
-                <text x="318" y="285">03</text>
-                <text x="318" y="195">04</text>
-                <text x="318" y="105">05</text>
-              </g>
-            </svg>
-            <span class="stack-caption">TRACEABLE PIPELINE / BOTTOM → TOP</span>
-          </div>
-
-          <div class="architecture-layers">
-            <article><span>05</span><div><h3>평가 및 보고</h3><p>커버리지, 재현, 충돌과 통계 결과를 감사 가능한 형태로 출력합니다.</p></div></article>
-            <article><span>04</span><div><h3>대응 실험</h3><p>동일한 시간·연산·시드 조건에서 Baseline과 Guided 실험을 실행합니다.</p></div></article>
-            <article><span>03</span><div><h3>지침 생성 및 검증</h3><p>가설을 Fuzzilli 지침으로 변환하고 실제 표적에 도달하는지 먼저 검증합니다.</p></div></article>
-            <article><span>02</span><div><h3>LLM 변종 분석</h3><p>근본 원인, 트리거 명세와 인접 변종 가설을 단계적으로 생성합니다.</p></div></article>
-            <article><span>01</span><div><h3>근거 및 실행 계층</h3><p>CVE·패치·PoC 메타데이터와 V8·Fuzzilli 실행 환경을 연결합니다.</p></div></article>
-          </div>
-        </div>
-      </section>
-
       <section class="section metrics" id="metrics">
         <div class="metrics-copy reveal">
-          <p class="section-index">04 / 평가</p>
+          <p class="section-index">03 / 평가</p>
           <h2>지침은 가설이고,<br /><span>근거가 결과입니다.</span></h2>
           <p>
             모든 유도 실험은 시간, 연산 자원, 메모리와 시드 예산이 동일한 기본 실험과
@@ -223,7 +184,7 @@
 
       <section class="section principles" id="principles">
         <div class="section-heading reveal">
-          <p class="section-index">05 / 연구 원칙</p>
+          <p class="section-index">04 / 연구 원칙</p>
           <h2>성급한 결론에<br /><span>저항하도록 설계합니다.</span></h2>
         </div>
         <div class="principle-list">

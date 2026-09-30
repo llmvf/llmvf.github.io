@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LLMVF의 근거 수집, LLM 분석, 퍼징 지침 검증과 대응 실험 아키텍처를 설명합니다." />
+    <meta name="theme-color" content="#050506" />
+    <title>Architecture — LLMVF</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 바로가기</a>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header scrolled" data-header>
+      <a class="brand" href="index.html" aria-label="LLMVF 홈">
+        <span class="brand-mark" aria-hidden="true">L/</span><span>LLMVF</span>
+      </a>
+      <nav aria-label="주요 메뉴">
+        <a href="index.html">Home</a>
+        <a class="active" href="architecture.html">Architecture</a>
+        <a href="performance.html">성과 요약</a>
+        <a href="reports.html">Report</a>
+        <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="main" class="subpage architecture-page">
+      <section class="page-hero reveal">
+        <div>
+          <p class="section-index">SYSTEM ARCHITECTURE</p>
+          <h1>추론을 실행으로,<br /><span>실행을 근거로.</span></h1>
+        </div>
+        <p>
+          LLM의 출력이 곧바로 연구 결과가 되지는 않습니다. 구조화된 근거에서 시작해
+          검증된 퍼징 지침과 공정한 대응 실험을 거쳐야 비로소 보고 가능한 결과가 됩니다.
+        </p>
+      </section>
+
+      <section class="flow-section reveal" aria-labelledby="flow-title">
+        <div class="flow-title-row">
+          <div><p class="section-index">END-TO-END DATA FLOW</p><h2 id="flow-title">데이터가 통과하는 경로</h2></div>
+          <p>각 단계는 명시적인 입력과 출력을 가지며, 실패나 누락을 다음 단계에 숨기지 않습니다.</p>
+        </div>
+
+        <div class="system-flow">
+          <div class="flow-coordinate"><span>INPUT</span><span>ANALYSIS</span><span>COMPILATION</span></div>
+          <div class="flow-primary">
+            <article class="flow-stage evidence-stage">
+              <span class="stage-id">01 / EVIDENCE</span>
+              <h3>취약점 근거</h3>
+              <div class="evidence-chips"><i>CVE</i><i>PATCH</i><i>PoC</i><i>ADVISORY</i></div>
+              <p>버전과 출처를 보존한 지식 레코드</p>
+            </article>
+            <span class="flow-connector" aria-hidden="true"><i></i></span>
+            <article class="flow-stage analysis-stage">
+              <span class="stage-id">02 / REASONING</span>
+              <h3>LLM 변종 분석</h3>
+              <ul><li>근본 원인</li><li>트리거 명세</li><li>변종 가설</li></ul>
+              <p>단계별 구조화 출력과 출처 연결</p>
+            </article>
+            <span class="flow-connector" aria-hidden="true"><i></i></span>
+            <article class="flow-stage directive-stage">
+              <span class="stage-id">03 / DIRECTIVE</span>
+              <h3>지침 컴파일러</h3>
+              <ul><li>시드</li><li>생성기</li><li>가중치</li><li>표적 함수</li></ul>
+              <p>d8 실행을 통한 사전 유효성 검증</p>
+            </article>
+          </div>
+
+          <div class="flow-fork" aria-hidden="true"><span>동일한 자원 예산으로 분기</span><i></i></div>
+
+          <div class="experiment-lanes">
+            <article class="lane baseline-lane">
+              <span>04-A / CONTROL</span><h3>Baseline Fuzzilli</h3>
+              <p>지침 없이 stock 설정으로 실행</p><strong>EMPTY DIRECTIVE</strong>
+            </article>
+            <article class="lane guided-lane">
+              <span>04-B / TREATMENT</span><h3>LLM-Guided Fuzzilli</h3>
+              <p>검증된 표적 지침을 주입해 실행</p><strong>VALIDATED DIRECTIVE</strong>
+            </article>
+          </div>
+
+          <div class="flow-merge" aria-hidden="true"><i></i><span>PAIRED RESULTS</span></div>
+
+          <div class="evaluation-stage">
+            <div><span class="stage-id">05 / EVALUATION</span><h3>측정·통계·보고</h3></div>
+            <ul>
+              <li><strong>REPRO</strong><span>CVE 재현</span></li>
+              <li><strong>TF COV</strong><span>표적 함수 커버리지</span></li>
+              <li><strong>CRASH</strong><span>고유 충돌</span></li>
+              <li><strong>Δt</strong><span>최초 신호 시간</span></li>
+              <li><strong>A₁₂</strong><span>효과 크기</span></li>
+            </ul>
+            <a href="reports.html">공개 Report 확인 ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section contracts-section">
+        <div class="section-heading reveal">
+          <p class="section-index">SYSTEM CONTRACTS</p>
+          <h2>연결보다 중요한<br /><span>경계의 규칙</span></h2>
+          <p>각 모듈은 성공 결과뿐 아니라 검증 실패와 불완전한 증거도 명시적으로 전달합니다.</p>
+        </div>
+        <div class="contract-grid">
+          <article class="reveal"><span>01</span><h3>Evidence Contract</h3><p>패치, PoC와 버전 정보의 출처·해시·분할 정책을 보존합니다.</p></article>
+          <article class="reveal"><span>02</span><h3>Directive Contract</h3><p>모델의 자유 형식 출력을 실행 가능한 제한된 지침으로 변환합니다.</p></article>
+          <article class="reveal"><span>03</span><h3>Budget Contract</h3><p>두 실험군의 시간, 코어, 메모리, 인스턴스와 시드 계보를 고정합니다.</p></article>
+          <article class="reveal"><span>04</span><h3>Report Contract</h3><p>대응쌍이 누락되면 통계치를 만들지 않고 불완전 상태를 그대로 보고합니다.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="index.html"><span class="brand-mark">L/</span><span>LLMVF</span></a>
+      <p>LLM 기반 변종 취약점 분석 프레임워크</p>
+      <p>© <span data-year></span> LLMVF Research</p>
+    </footer>
+  </body>
+</html>
