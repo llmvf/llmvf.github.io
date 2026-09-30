@@ -7,7 +7,7 @@
       name="description"
       content="LLMVF는 LLM 기반 취약점 변종 분석과 커버리지 기반 퍼징을 결합한 보안 연구 프레임워크입니다."
     />
-    <meta name="theme-color" content="#07110f" />
+    <meta name="theme-color" content="#050506" />
     <meta property="og:title" content="LLMVF — LLM 기반 변종 취약점 퍼징" />
     <meta
       property="og:description"
@@ -77,9 +77,44 @@
         <p>패치 차이</p><span>×</span><p>근본 원인</p><span>×</span><p>퍼징</p><span>→</span><p>측정 가능한 근거</p>
       </section>
 
+      <section class="section project-focus" id="focus">
+        <div class="focus-copy reveal">
+          <p class="section-index">01 / PROJECT FOCUS</p>
+          <h2>V8을 다시,<br /><span>정밀하게 조준합니다.</span></h2>
+          <p class="focus-lede">
+            LLMVF는 V8을 재학습하거나 임의로 수정하는 프로젝트가 아닙니다.
+            이미 알려진 취약점의 패치와 실행 근거를 읽고, 방대한 JavaScript 상태 공간에서
+            다음 탐색이 집중되어야 할 위치와 조건을 더 정밀하게 정의합니다.
+          </p>
+          <div class="focus-points">
+            <div><span>01</span><p><strong>근본 원인</strong>패치가 막은 메커니즘을 구조화합니다.</p></div>
+            <div><span>02</span><p><strong>트리거 조건</strong>취약 동작에 필요한 상태 조합을 좁힙니다.</p></div>
+            <div><span>03</span><p><strong>변종 경계</strong>패치 주변의 아직 검증되지 않은 가능성을 탐색합니다.</p></div>
+          </div>
+        </div>
+
+        <div class="target-map reveal" aria-label="V8 탐색 공간 정밀화 개념도">
+          <div class="map-label map-label-top">V8 / SEARCH SURFACE</div>
+          <div class="v8-globe" aria-hidden="true">
+            <i class="orbit orbit-a"></i>
+            <i class="orbit orbit-b"></i>
+            <i class="orbit orbit-c"></i>
+            <span class="target-point point-a"></span>
+            <span class="target-point point-b"></span>
+            <span class="target-point point-c"></span>
+            <span class="target-core">V8</span>
+          </div>
+          <div class="map-callout callout-a"><span>PATCH</span><strong>변경 지점</strong></div>
+          <div class="map-callout callout-b"><span>TRIGGER</span><strong>도달 조건</strong></div>
+          <div class="map-callout callout-c"><span>VARIANT</span><strong>탐색 경계</strong></div>
+          <div class="map-axis"><span>넓은 상태 공간</span><i></i><strong>표적 탐색</strong></div>
+          <div class="map-footer"><span>INPUT / CVE EVIDENCE</span><span>OUTPUT / FUZZ DIRECTIVE</span></div>
+        </div>
+      </section>
+
       <section class="section method" id="method">
         <div class="section-heading reveal">
-          <p class="section-index">01 / 연구 방법</p>
+          <p class="section-index">02 / 연구 방법</p>
           <h2>근거를 입력하고,<br /><span>실험으로 답합니다.</span></h2>
           <p>
             모델이 추론한 내용과 퍼저가 실행한 작업, 그리고 실험으로 입증할 수 있는 결과를
@@ -119,9 +154,59 @@
         </div>
       </section>
 
+      <section class="section architecture" id="architecture">
+        <div class="section-heading reveal">
+          <p class="section-index">03 / ARCHITECTURE</p>
+          <h2>하나의 추론을<br /><span>다섯 겹의 검증으로.</span></h2>
+          <p>
+            각 계층의 입력과 출력이 분리되어 있어, 모델의 제안이 실제 실행과
+            측정 결과로 이어지는 전 과정을 추적할 수 있습니다.
+          </p>
+        </div>
+
+        <div class="architecture-board reveal">
+          <div class="architecture-visual">
+            <svg viewBox="0 0 720 570" role="img" aria-labelledby="architecture-title architecture-desc">
+              <title id="architecture-title">LLMVF 계층형 아키텍처</title>
+              <desc id="architecture-desc">취약점 근거부터 공개 보고서까지 이어지는 다섯 계층</desc>
+              <g class="stack-guide">
+                <path d="M82 465L330 555L578 465" />
+                <path d="M82 380L330 470L578 380" />
+                <path d="M82 295L330 385L578 295" />
+                <path d="M82 210L330 300L578 210" />
+                <path d="M82 125L330 215L578 125" />
+              </g>
+              <g class="stack-layers">
+                <polygon class="layer layer-1" points="82,440 330,350 578,440 330,530" />
+                <polygon class="layer layer-2" points="82,350 330,260 578,350 330,440" />
+                <polygon class="layer layer-3" points="82,260 330,170 578,260 330,350" />
+                <polygon class="layer layer-4" points="82,170 330,80 578,170 330,260" />
+                <polygon class="layer layer-5" points="82,80 330,10 578,80 330,170" />
+              </g>
+              <g class="stack-numbers">
+                <text x="318" y="465">01</text>
+                <text x="318" y="375">02</text>
+                <text x="318" y="285">03</text>
+                <text x="318" y="195">04</text>
+                <text x="318" y="105">05</text>
+              </g>
+            </svg>
+            <span class="stack-caption">TRACEABLE PIPELINE / BOTTOM → TOP</span>
+          </div>
+
+          <div class="architecture-layers">
+            <article><span>05</span><div><h3>평가 및 보고</h3><p>커버리지, 재현, 충돌과 통계 결과를 감사 가능한 형태로 출력합니다.</p></div></article>
+            <article><span>04</span><div><h3>대응 실험</h3><p>동일한 시간·연산·시드 조건에서 Baseline과 Guided 실험을 실행합니다.</p></div></article>
+            <article><span>03</span><div><h3>지침 생성 및 검증</h3><p>가설을 Fuzzilli 지침으로 변환하고 실제 표적에 도달하는지 먼저 검증합니다.</p></div></article>
+            <article><span>02</span><div><h3>LLM 변종 분석</h3><p>근본 원인, 트리거 명세와 인접 변종 가설을 단계적으로 생성합니다.</p></div></article>
+            <article><span>01</span><div><h3>근거 및 실행 계층</h3><p>CVE·패치·PoC 메타데이터와 V8·Fuzzilli 실행 환경을 연결합니다.</p></div></article>
+          </div>
+        </div>
+      </section>
+
       <section class="section metrics" id="metrics">
         <div class="metrics-copy reveal">
-          <p class="section-index">02 / 평가</p>
+          <p class="section-index">04 / 평가</p>
           <h2>지침은 가설이고,<br /><span>근거가 결과입니다.</span></h2>
           <p>
             모든 유도 실험은 시간, 연산 자원, 메모리와 시드 예산이 동일한 기본 실험과
@@ -138,7 +223,7 @@
 
       <section class="section principles" id="principles">
         <div class="section-heading reveal">
-          <p class="section-index">03 / 연구 원칙</p>
+          <p class="section-index">05 / 연구 원칙</p>
           <h2>성급한 결론에<br /><span>저항하도록 설계합니다.</span></h2>
         </div>
         <div class="principle-list">
