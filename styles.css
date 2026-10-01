@@ -1179,3 +1179,57 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
     height: 30px;
   }
 }
+
+/* Mobile header stays on one shared center line. */
+@media (max-width: 700px) {
+  .site-header {
+    height: 58px;
+    padding: 0 10px;
+    align-items: center;
+  }
+  .site-header .brand {
+    height: auto;
+    flex: 0 0 auto;
+    padding: 0;
+  }
+  .site-header .brand > span:last-child { display: none; }
+  .header-actions {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    gap: .25rem;
+  }
+  .header-actions nav {
+    position: static;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+  .header-actions nav a,
+  .header-actions nav a:not(.active):not(.nav-cta),
+  .header-actions nav a.active {
+    min-height: 30px;
+    padding: 0 .32rem;
+    display: inline-flex !important;
+    align-items: center;
+    font-size: .52rem;
+    white-space: nowrap;
+  }
+  .header-actions .nav-cta {
+    min-height: 30px;
+    padding: 0 .55rem;
+    white-space: nowrap;
+  }
+  .header-actions .theme-toggle {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+  }
+  .subpage { padding-top: 58px; }
+  .hero { padding-top: 5.5rem; }
+}
