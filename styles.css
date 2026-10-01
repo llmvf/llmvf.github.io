@@ -1246,8 +1246,10 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
   border-radius: 0;
   color: var(--muted);
   background: transparent;
-  font-weight: 500;
-  line-height: 1;
+  font-family: inherit;
+  font-size: .72rem;
+  font-weight: 400;
+  line-height: 1.5;
   transform: translateY(1px);
 }
 .header-actions .nav-cta:hover {
