@@ -1233,3 +1233,27 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
   .subpage { padding-top: 58px; }
   .hero { padding-top: 5.5rem; }
 }
+
+/* GitHub stays visually consistent with the navigation instead of a CTA pill. */
+.header-actions .nav-cta {
+  min-height: 30px;
+  padding: 0 .65rem;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 500;
+}
+.header-actions .nav-cta:hover {
+  color: var(--acid);
+  background: transparent;
+}
+
+@media (max-width: 700px) {
+  .header-actions .nav-cta {
+    padding: 0 .45rem;
+    border: 0;
+    font-size: .52rem;
+  }
+}
