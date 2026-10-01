@@ -1144,3 +1144,38 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
   .pipeline-card { min-height: 320px; }
   .card-icon { margin: 2.25rem 0 1.5rem; }
 }
+
+/* Keep repository and theme controls together as one header unit. */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-left: auto;
+}
+.header-actions .nav-cta { margin-left: .35rem; }
+.header-actions .theme-toggle { margin-left: 0; }
+
+@media (max-width: 700px) {
+  .header-actions { height: 46px; gap: .35rem; }
+  .header-actions nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  .header-actions .nav-cta {
+    min-height: 30px;
+    margin: 0;
+    padding: 0 .7rem;
+    display: inline-flex !important;
+    align-items: center;
+    border: 1px solid var(--strong-line);
+    border-radius: 999px;
+    font-size: .62rem;
+  }
+  .header-actions .theme-toggle {
+    position: static;
+    width: 30px;
+    height: 30px;
+  }
+}
