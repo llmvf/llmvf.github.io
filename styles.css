@@ -1236,6 +1236,9 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
 
 /* GitHub stays visually consistent with the navigation instead of a CTA pill. */
 .header-actions .nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 30px;
   padding: 0 .65rem;
   border: 0;
@@ -1244,10 +1247,13 @@ html[data-theme="light"] .flow-merge span { background: var(--bg); }
   color: var(--muted);
   background: transparent;
   font-weight: 500;
+  line-height: 1;
+  transform: translateY(1px);
 }
 .header-actions .nav-cta:hover {
   color: var(--acid);
   background: transparent;
+  transform: translateY(1px);
 }
 
 @media (max-width: 700px) {
