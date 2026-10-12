@@ -214,7 +214,11 @@ function findingStatus(study, cveId) {
   const discovery = [...discoveryStudies].reverse().find(row =>
     !row.fixture && row.cve_id === cveId
   );
-  const confirmation = discovery?.candidate_validation?.confirmation?.status;
+  const statuses = (discovery?.candidate_validations || [])
+    .map(row => row?.confirmation?.status).filter(Boolean);
+  const confirmation = ['confirmed_variant', 'confirmed_known_cve', 'variant_priority',
+    'related_variant_candidate', 'candidate', 'false_positive']
+    .find(status => statuses.includes(status));
   if (confirmation === 'confirmed_variant') return 'confirmed_variant';
   if (confirmation === 'confirmed_known_cve'
       || study?.fuzzer_discovery?.status === 'rediscovered') return 'confirmed_known_cve';
@@ -309,6 +313,78 @@ function renderAgentStudy(cve) {
     <div class="study-chart-grid">${studyMetrics.map(metric => renderStudyMetric(metric, arms, study)).join('')}</div>`;
 }
 
+function latestDiscovery(cveId, experimentType = null) {
+  return discoveryStudies.filter(row =>
+    !row.fixture && row.cve_id === cveId
+      && (!experimentType || row.experiment_type === experimentType)
+  ).sort((a,b) => Number(b.artifact_mtime_ns || 0) - Number(a.artifact_mtime_ns || 0))[0];
+}
+
+function renderDiscoveryEvaluation(cveId) {
+  const rediscovery = latestDiscovery(cveId, 'poc_free_rediscovery');
+  const variant = latestDiscovery(cveId, 'variant_discovery');
+  const active = variant || rediscovery;
+  const guided = latestStudy(cveId);
+  const guidedFinding = guided?.fuzzer_discovery?.status === 'rediscovered';
+  el('guided-lane-summary').textContent = guided
+    ? `Target AUC 판정: ${guided.statistical_decision?.level || '미판정'} · 실제 finding ${guidedFinding ? '있음' : '없음'}`
+    : 'Guided/localization 결과가 없습니다.';
+  el('rediscovery-lane-summary').textContent = rediscovery
+    ? `품질 gate ${rediscovery.quality_gate?.status || 'unknown'} · confirmed known-CVE ${rediscovery.coverage_finding_separation?.confirmed_known_cve_count || 0}`
+    : 'PoC-free rediscovery 결과가 없습니다.';
+  el('variant-lane-summary').textContent = variant
+    ? `confirmed variant ${variant.coverage_finding_separation?.confirmed_variant_count || 0} · 자동 확정 없음`
+    : 'Variant-discovery 결과가 없습니다.';
+
+  if (!active) {
+    el('discovery-quality-pill').textContent = 'NO DATA';
+    el('discovery-arm-comparison').innerHTML = '<p class="caption">이 CVE의 discovery 실행 결과가 없습니다.</p>';
+    el('trigger-funnel').innerHTML = '<p class="caption">No trigger evidence</p>';
+    el('discovery-findings').innerHTML = '<p class="caption">No finding evidence</p>';
+    el('discovery-cost').innerHTML = '<p class="caption">No cost evidence</p>';
+  } else {
+    const arms = active.arm_summary || {};
+    el('discovery-quality-pill').textContent = `${active.experiment_type} · ${active.quality_gate?.status || 'unknown'}`;
+    const maxEdge = Math.max(1, ...Object.values(arms).map(row => Number(row.edge_coverage_median || 0)));
+    el('discovery-arm-comparison').innerHTML = Object.entries(arms).map(([name, row]) =>
+      `<div class="discovery-bar-row ${name}"><b>${name.replaceAll('_',' ')}</b><span class="discovery-track"><i style="width:${Number(row.edge_coverage_median || 0) / maxEdge * 100}%"></i></span><small>edge ${fmt(row.edge_coverage_median)} · finding ${Number(row.rediscoveries || 0) + Number(row.confirmed_variants || 0)}</small></div>`
+    ).join('');
+    const agent = arms.agent_loop || {};
+    const funnel = agent.trigger_stage_reach_rate || {};
+    el('trigger-funnel').innerHTML = [1,2,3,4,5].map(stage => {
+      const rate = Number(funnel[String(stage)] || 0);
+      return `<div class="funnel-row"><b>STAGE ${stage}</b><i style="width:${rate * 100}%"></i><small>${fmt(rate * 100)}%</small></div>`;
+    }).join('');
+    const validations = active.candidate_validations || [];
+    const statuses = validations.map(row => row?.confirmation?.status).filter(Boolean);
+    el('discovery-findings').innerHTML = [
+      ['Candidates', Object.values(arms).reduce((n,row)=>n+Number(row.candidates||0),0)],
+      ['Known-CVE rediscoveries', active.coverage_finding_separation?.confirmed_known_cve_count || 0],
+      ['Confirmed variants', active.coverage_finding_separation?.confirmed_variant_count || 0],
+      ['Validation status', active.candidate_validation_status || 'unknown'],
+      ['Evidence states', statuses.join(', ') || 'none']
+    ].map(([name,value]) => `<div class="finding-datum"><span>${name}</span><b>${value}</b></div>`).join('');
+    const costs = active.discovery_costs || {};
+    el('discovery-cost').innerHTML = [
+      ['Provider calls', costs.provider_calls], ['Tokens', Number(costs.input_tokens||0)+Number(costs.output_tokens||0)],
+      ['Latency', costs.latency_seconds == null ? null : `${fmt(costs.latency_seconds)}s`],
+      ['Total cost', costs.cost_usd == null ? 'not priced' : `$${Number(costs.cost_usd).toFixed(4)}`],
+      ['Cost / candidate', costs.cost_per_candidate == null ? 'n/a' : `$${Number(costs.cost_per_candidate).toFixed(4)}`],
+      ['Cost / confirmed finding', costs.cost_per_confirmed_finding == null ? 'n/a' : `$${Number(costs.cost_per_confirmed_finding).toFixed(4)}`]
+    ].map(([name,value]) => `<div class="cost-datum"><span>${name}</span><b>${value ?? '—'}</b></div>`).join('');
+  }
+
+  const forest = discoveryStudies.filter(row => !row.fixture).map(row => ({
+    cve: row.cve_id,
+    effect: row.discovery_comparisons?.agent_vs_stock?.a12,
+    ci: row.discovery_comparisons?.agent_vs_stock?.a12_ci95,
+    type: row.experiment_type
+  })).filter(row => Number.isFinite(row.effect));
+  el('discovery-forest').innerHTML = forest.length ? forest.map(row =>
+    `<div class="forest-row"><b>${row.cve}<small> ${row.type}</small></b><span class="forest-axis">${Array.isArray(row.ci) ? `<i class="forest-ci" style="left:${row.ci[0]*100}%;width:${Math.max(1,(row.ci[1]-row.ci[0])*100)}%"></i>` : ''}<i class="forest-point" style="left:${Math.max(0,Math.min(100,row.effect*100))}%"></i></span><small>A12 ${Number(row.effect).toFixed(2)}</small></div>`
+  ).join('') : '<p class="caption">Forest plot에 표시할 실제 discovery effect가 없습니다.</p>';
+}
+
 function renderCampaign() {
   const campaign = [...campaigns].reverse().find(item => item.status === 'complete' && item.preflight?.ready)
     || campaigns.at(-1);
@@ -325,6 +401,7 @@ function render(exp) {
   selectedCve = exp.cve_id;
   renderCveBrief(exp);
   renderFinalResult(study, exp.cve_id);
+  renderDiscoveryEvaluation(exp.cve_id);
   document.querySelectorAll('.tabs button').forEach(b => {
     const active = b.dataset.cve === exp.cve_id;
     b.classList.toggle('active', active);
