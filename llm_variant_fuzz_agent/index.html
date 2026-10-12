@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>LLMVF · Experiment Results</title>
-  <link rel="stylesheet" href="styles.css?v=evidence-20261012-6">
+  <script>document.documentElement.dataset.theme=localStorage.getItem('llmvf-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');</script>
+  <link rel="stylesheet" href="styles.css?v=evidence-20261012-7">
 </head>
 <body>
   <header class="topbar">
@@ -25,6 +26,7 @@
         <a class="active" href="./">Experiment Results</a>
       </nav>
       <a class="site-return" href="https://github.com/llmvf">GitHub ↗</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle color theme"><span aria-hidden="true">◐</span></button>
     </div>
   </header>
 
@@ -116,6 +118,47 @@
         </article>
       </section>
 
+      <section class="research-lanes" aria-label="Separated experiment types">
+        <article class="lane-card guided" id="guided-lane">
+          <small>GUIDED LOCALIZATION</small>
+          <h3>Target를 더 잘 찾는가?</h3>
+          <p id="guided-lane-summary">Target coverage와 AUC만 판정하며 실제 finding과 분리합니다.</p>
+        </article>
+        <article class="lane-card rediscovery" id="rediscovery-lane">
+          <small>PoC-FREE REDISCOVERY</small>
+          <h3>PoC 없이 CVE를 다시 찾는가?</h3>
+          <p id="rediscovery-lane-summary">등록된 3-build oracle을 통과한 finding만 재발견으로 계산합니다.</p>
+        </article>
+        <article class="lane-card variant" id="variant-lane">
+          <small>VARIANT DISCOVERY</small>
+          <h3>Current-upstream variant가 있는가?</h3>
+          <p id="variant-lane-summary">최소화·중복 제거·root-cause 확인 전에는 후보 상태를 유지합니다.</p>
+        </article>
+      </section>
+
+      <section class="discovery-grid" id="discovery-evaluation">
+        <article class="panel wide">
+          <div class="panel-title"><span>DISCOVERY ARM COMPARISON</span><span id="discovery-quality-pill" class="pill">NO DATA</span></div>
+          <div id="discovery-arm-comparison" class="discovery-bars"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><span>TRIGGER-STAGE FUNNEL</span><span>STAGE 1 → 5</span></div>
+          <div id="trigger-funnel" class="trigger-funnel"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><span>REDISCOVERY &amp; VARIANT</span><span>FINDINGS</span></div>
+          <div id="discovery-findings" class="discovery-findings"></div>
+        </article>
+        <article class="panel wide">
+          <div class="panel-title"><span>CVE EFFECT FOREST</span><span>AGENT VS STOCK</span></div>
+          <div id="discovery-forest" class="forest-plot"></div>
+        </article>
+        <article class="panel wide">
+          <div class="panel-title"><span>LLM COST</span><span>CAMPAIGN SCOPE</span></div>
+          <div id="discovery-cost" class="cost-chart"></div>
+        </article>
+      </section>
+
       <section class="lower-grid">
         <article class="panel wide primary-panel">
           <div class="panel-title"><span>FOUR-ARM COMPARISON</span><span id="agent-study-pill" class="pill">NO DATA</span></div>
@@ -142,6 +185,12 @@
 
     <footer><span id="generated"></span><span>실제 finding과 target coverage를 별도 지표로 해석합니다.</span></footer>
   </main>
-  <script src="app.js?v=evidence-20261012-6"></script>
+  <script src="app.js?v=evidence-20261012-7"></script>
+  <script>
+    const themeButton=document.querySelector('.theme-toggle');
+    const syncThemeButton=()=>themeButton.querySelector('span').textContent=document.documentElement.dataset.theme==='dark'?'☀':'☾';
+    syncThemeButton();
+    themeButton.addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('llmvf-theme',next);syncThemeButton();});
+  </script>
 </body>
 </html>
