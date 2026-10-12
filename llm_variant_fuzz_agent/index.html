@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>LLMVF · Experiment Results</title>
+  <link rel="stylesheet" href="styles.css?v=evidence-20261012-5">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="LLMVF 결과 요약으로 이동">
+      <span class="brand-mark">LV</span>
+      <span><b>LLMVF</b><small>V8 FUZZING EVALUATION</small></span>
+    </a>
+    <div class="topbar-actions">
+      <a class="site-return" href="../index.html">MAIN SITE</a>
+      <div class="live"><i></i><span>RESULTS SNAPSHOT</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <div>
+        <p class="eyebrow">EXPERIMENT SUMMARY</p>
+        <h1>Did the agent<br><em>guide the search better?</em></h1>
+      </div>
+    </section>
+
+    <section class="detail-section" id="detail">
+      <div class="section-title detail-title">
+        <div><span>CVE EXPLORER</span></div>
+        <div id="verdict" class="verdict"></div>
+      </div>
+      <div class="year-filter-wrap">
+        <span>FILTER BY YEAR</span>
+        <div id="year-filter" class="year-filter" role="group" aria-label="CVE year filter"></div>
+      </div>
+      <div class="cve-picker-wrap">
+        <span>SELECT CVE</span>
+        <div id="cve-tabs" class="tabs" role="tablist" aria-label="CVE 선택"></div>
+      </div>
+      <article id="cve-brief" class="cve-brief">
+        <div class="cve-brief-head">
+          <div>
+            <span id="cve-year" class="brief-year">—</span>
+            <h2 id="cve-brief-title">—</h2>
+          </div>
+          <div id="cve-taxonomy" class="brief-taxonomy"></div>
+        </div>
+        <p id="cve-tldr" class="brief-copy"></p>
+        <div id="cve-links" class="brief-links"></div>
+      </article>
+
+      <article id="final-result" class="final-result">
+        <div class="final-result-head">
+          <span>FINAL RESULT</span>
+          <b id="final-result-badge">—</b>
+        </div>
+        <div class="final-result-body">
+          <div>
+            <h3 id="final-result-title">—</h3>
+            <p id="final-result-copy"></p>
+          </div>
+          <div class="final-result-stats">
+            <div><small>TARGET AUC Δ</small><strong id="final-result-delta">—</strong></div>
+            <div><small>P-VALUE</small><strong id="final-result-p">—</strong></div>
+            <div><small>ACTUAL FINDING</small><strong id="final-result-finding">—</strong></div>
+          </div>
+        </div>
+        <div class="finding-summary">
+          <div id="finding-ladder" class="finding-ladder" aria-label="Finding evidence status"></div>
+          <p id="finding-detail"></p>
+        </div>
+      </article>
+
+      <section class="metric-grid">
+        <article class="metric-card feature">
+          <div class="card-head"><span>EDGE COVERAGE</span><span id="edge-effect" class="tag"></span></div>
+          <div class="comparison">
+            <div><small>STOCK</small><strong id="edge-baseline">—</strong></div>
+            <div class="arrow">→</div>
+            <div><small>GUIDED</small><strong id="edge-guided">—</strong></div>
+          </div>
+          <div class="bar-chart" id="edge-bars"></div>
+          <p id="edge-caption" class="caption"></p>
+        </article>
+        <article class="metric-card">
+          <div class="card-head"><span>KNOWN PoC</span><span id="poc-dot" class="status-dot"></span></div>
+          <strong id="poc-status" class="big-status">—</strong>
+          <p id="poc-detail" class="caption"></p>
+        </article>
+        <article class="metric-card">
+          <div class="card-head"><span>FUZZER REDISCOVERY</span><span id="rediscovery-dot" class="status-dot"></span></div>
+          <strong id="rediscovery-status" class="big-status">—</strong>
+          <p id="rediscovery-detail" class="caption"></p>
+        </article>
+        <article class="metric-card compact-card">
+          <div class="card-head"><span>TARGET COVERAGE</span><span id="target-tag" class="tag"></span></div>
+          <strong id="target-value" class="big-status">—</strong>
+          <p id="target-reason" class="caption"></p>
+        </article>
+        <article class="metric-card compact-card">
+          <div class="card-head"><span>UNIQUE CRASHES</span><span class="tag">MEDIAN</span></div>
+          <div class="split-value"><span>Stock <b id="crash-baseline">—</b></span><span>Guided <b id="crash-guided">—</b></span></div>
+          <p class="caption">Crash는 검증 전까지 variant로 간주하지 않습니다.</p>
+        </article>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel wide primary-panel">
+          <div class="panel-title"><span>FOUR-ARM COMPARISON</span><span id="agent-study-pill" class="pill">NO DATA</span></div>
+          <div id="agent-study" class="agent-study"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><span>EXPERIMENT CONTRACT</span><span id="mode-pill" class="pill"></span></div>
+          <div id="contract" class="contract"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-title"><span>GUIDANCE DELIVERY</span><span id="seed-pill" class="pill"></span></div>
+          <div id="guidance" class="guidance"></div>
+        </article>
+        <article class="panel wide">
+          <div class="panel-title"><span>EVIDENCE GATES</span><span>WHY THIS RESULT COUNTS</span></div>
+          <div id="gates" class="gates"></div>
+        </article>
+        <details class="panel wide operational">
+          <summary><span>OPERATIONS &amp; CAMPAIGN READINESS</span><span id="campaign-pill" class="pill">NO MANIFEST</span></summary>
+          <div id="campaign-status" class="guidance"></div>
+        </details>
+      </section>
+    </section>
+
+    <footer><span id="generated"></span><span>실제 finding과 target coverage를 별도 지표로 해석합니다.</span></footer>
+  </main>
+  <script src="app.js?v=evidence-20261012-5"></script>
+</body>
+</html>
