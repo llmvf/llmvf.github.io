@@ -91,8 +91,7 @@ const studyMetrics = [
   {key: 'target_coverage_auc', label: 'Target coverage AUC', kind: 'ratio', help: '실험 시간 전체에서 취약 함수 영역을 얼마나 지속적으로 탐색했는지'},
   {key: 'target_function_coverage', label: 'Final target coverage', kind: 'ratio', help: '종료 시점에 도달한 타깃 PC 비율'},
   {key: 'edge_coverage', label: 'Edge coverage', kind: 'integer', help: '전체 탐색 폭을 나타내는 최종 edge 수'},
-  {key: 'unique_crashes', label: 'Unique crashes', kind: 'integer', help: '중복 제거된 crash bucket 수'},
-  {key: 'novel_variant_candidates', label: 'Variant candidates', kind: 'integer', help: '후속 검증 대상으로 분류된 신규 변종 후보'}
+  {key: 'unique_crashes', label: 'Unique crashes', kind: 'integer', help: '중복 제거된 crash bucket 수'}
 ];
 
 function metricValue(value, kind) {
@@ -273,26 +272,6 @@ const findingDetails = {
 };
 
 function findingStatus(study, cveId) {
-  const discovery = [...discoveryStudies].reverse().find(row =>
-    !row.fixture && row.cve_id === cveId
-  );
-  const statuses = (discovery?.candidate_validations || [])
-    .map(row => row?.confirmation?.status).filter(Boolean);
-  const confirmation = ['confirmed_variant', 'confirmed_known_cve', 'variant_priority',
-    'related_variant_candidate', 'candidate', 'false_positive']
-    .find(status => statuses.includes(status));
-  if (confirmation === 'confirmed_variant') return 'confirmed_variant';
-  if (confirmation === 'confirmed_known_cve'
-      || study?.fuzzer_discovery?.status === 'rediscovered') return 'confirmed_known_cve';
-  if (confirmation === 'false_positive') return 'false_positive';
-  if (['related_variant_candidate', 'variant_priority'].includes(confirmation)) return 'variant_pending';
-  const armCandidateCount = Object.values(study?.arm_metrics || {}).reduce(
-    (total, row) => total + Number(row?.novel_variant_candidates || 0), 0
-  );
-  const triageCandidateCount = Object.values(study?.crash_triage?.arms || {}).reduce(
-    (total, row) => total + Number(row?.variant_candidates || 0), 0
-  );
-  if (armCandidateCount + triageCandidateCount > 0) return 'candidate';
   const targetReached = Object.values(study?.arm_metrics || {}).some(
     row => Number(row?.target_function_coverage || 0) > 0
   );
@@ -307,7 +286,6 @@ function renderFinalResult(study, cveId) {
   const stockAuc = study?.arm_metrics?.stock?.target_coverage_auc;
   const delta = Number.isFinite(agentAuc) && Number.isFinite(stockAuc)
     ? (agentAuc - stockAuc) * 100 : null;
-  const rediscovered = study?.fuzzer_discovery?.status === 'rediscovered';
   const status = findingStatus(study, cveId);
   const positive = decision === 'confirmatory_positive';
   panel.classList.toggle('inconclusive', !positive);
@@ -316,34 +294,21 @@ function renderFinalResult(study, cveId) {
     el('final-result-badge').textContent = 'NO RESULT';
     el('final-result-title').textContent = 'No completed experiment result';
     el('final-result-copy').textContent = '이 CVE에는 아직 품질 게이트를 통과한 최종 실험 결과가 없습니다.';
-  } else if (positive && rediscovered) {
-    el('final-result-badge').textContent = 'CONFIRMED + FINDING';
-    el('final-result-title').textContent = '취약 영역 탐색 개선과 CVE 재발견을 모두 확인';
-    el('final-result-copy').textContent = 'Agent loop가 preregistered target AUC를 개선했고, 퍼징 과정에서 알려진 CVE oracle도 독립적으로 재발견했습니다.';
   } else if (positive) {
     el('final-result-badge').textContent = 'LOCALIZATION POSITIVE';
-    el('final-result-title').textContent = '취약 영역 탐색은 개선됐지만 실제 재발견은 없음';
-    el('final-result-copy').textContent = 'Agent loop는 Stock보다 target coverage AUC를 유의하게 개선했지만, 이번 퍼징 실행에서 실제 CVE 재발견은 확인되지 않았습니다.';
-  } else if (rediscovered) {
-    el('final-result-badge').textContent = 'FINDING OBSERVED';
-    el('final-result-title').textContent = 'CVE는 재발견했지만 Agent 효능 우위는 미확정';
-    el('final-result-copy').textContent = '실제 CVE 재발견은 관찰됐지만, target coverage AUC 개선은 confirmatory 기준을 충족하지 못했습니다.';
+    el('final-result-title').textContent = '취약 영역 탐색 개선을 확인';
+    el('final-result-copy').textContent = 'Agent loop가 Stock보다 target coverage AUC를 유의하게 개선했습니다.';
   } else {
     el('final-result-badge').textContent = 'INCONCLUSIVE';
-    el('final-result-title').textContent = '확정적인 성능 개선이나 실제 재발견을 확인하지 못함';
-    el('final-result-copy').textContent = 'Target coverage AUC 개선이 confirmatory 기준을 충족하지 못했고, 실제 CVE 재발견도 확인되지 않았습니다.';
+    el('final-result-title').textContent = '확정적인 target 탐색 개선을 확인하지 못함';
+    el('final-result-copy').textContent = 'Target coverage AUC 개선이 confirmatory 기준을 충족하지 못했습니다.';
   }
   el('final-result-delta').textContent = delta == null
     ? '—' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%p`;
   el('final-result-p').textContent = Number.isFinite(comparison.p_value)
     ? comparison.p_value.toFixed(4) : '—';
-  el('final-result-finding').textContent = ['confirmed_known_cve', 'confirmed_variant'].includes(status)
-    ? findingLabels[status] : 'NO CONFIRMED FINDING';
-  const ladder = [
-    status === 'target_not_reached' ? 'target_not_reached' : 'target_reached',
-    'candidate', 'confirmed_known_cve', 'variant_pending',
-    'confirmed_variant', 'false_positive'
-  ];
+  el('final-result-finding').textContent = findingLabels[status];
+  const ladder = ['target_not_reached', 'target_reached'];
   el('finding-ladder').innerHTML = ladder.map(item =>
     `<span class="${item === status ? 'active' : ''}">${findingLabels[item]}</span>`
   ).join('');
@@ -355,8 +320,8 @@ function renderFinalResult(study, cveId) {
   el('result-quality').textContent = study
     ? `${study.result_quality_gate?.status || 'unknown'} · ${study.research_admissible ? 'research admissible' : 'exploratory'}` : 'NO RESULT';
   el('result-interpretation').textContent = positive
-    ? (rediscovered ? '탐색 위치 개선과 실제 재발견을 모두 확인했습니다.' : '탐색 위치 개선은 확인했지만 실제 finding 개선은 확인하지 못했습니다.')
-    : (rediscovered ? '재발견은 관찰됐지만 Agent 효능 우위는 확정하지 못했습니다.' : 'Agent 효능 및 실제 finding 우위를 모두 확정할 수 없습니다.');
+    ? 'Agent의 target 탐색 개선을 확인했습니다.'
+    : 'Agent의 target 탐색 우위를 확정할 수 없습니다.';
 }
 
 function renderAgentStudy(cve) {
@@ -550,7 +515,7 @@ function render(exp) {
   el('poc-dot').className = `status-dot ${pocView[1]}`;
   el('poc-detail').textContent = `${poc.detail}${poc.oracle ? ` · oracle: ${poc.oracle}` : ''}`;
 
-  const rediscovery = study?.fuzzer_discovery || {status: 'not_evaluated', detail: 'no four-arm study is registered'};
+  const rediscovery = {status: 'not_evaluated', detail: 'experimental lane is hidden from the default view'};
   const rediscoveryView = {
     rediscovered: ['REDISCOVERED', 'pass'],
     not_rediscovered: ['NOT REDISCOVERED', 'warn'],
@@ -589,7 +554,6 @@ function render(exp) {
   const targetReady = target.status === 'available';
   el('gates').innerHTML = [
     gate('KNOWN PoC DIFFERENTIAL', poc.differential_verified ? 'pass' : poc.status === 'failed' ? 'fail' : 'warn', pocView[0]),
-    gate('FUZZER REDISCOVERY', rediscovery.status === 'rediscovered' ? 'pass' : rediscovery.status === 'not_rediscovered' ? 'warn' : 'fail', rediscoveryView[0]),
     gate('BUDGET PARITY', d.identical_budget_verified?'pass':'fail', d.identical_budget_verified?'arms use the same limits':'budget mismatch'),
     gate('REPETITIONS', enough?'pass':'warn', enough?'n ≥ 10':'smoke only; n < 10'),
     gate('RNG PAIRING', paired?'pass':'warn', paired?'paired inference enabled':'CLI cannot fix RNG seed'),

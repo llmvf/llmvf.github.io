@@ -82,7 +82,7 @@
           <div class="final-result-stats">
             <div><small>TARGET AUC Δ</small><strong id="final-result-delta">—</strong></div>
             <div><small>P-VALUE</small><strong id="final-result-p">—</strong></div>
-            <div><small>ACTUAL FINDING</small><strong id="final-result-finding">—</strong></div>
+            <div><small>TARGET REACH</small><strong id="final-result-finding">—</strong></div>
           </div>
         </div>
         <div class="finding-summary">
@@ -108,12 +108,12 @@
           <p id="edge-caption" class="caption"></p>
           <p id="edge-insight" class="chart-insight"></p>
         </article>
-        <article class="metric-card">
+        <article class="metric-card" hidden>
           <div class="card-head"><span>KNOWN PoC</span><span id="poc-dot" class="status-dot"></span></div>
           <strong id="poc-status" class="big-status">—</strong>
           <p id="poc-detail" class="caption"></p>
         </article>
-        <article class="metric-card">
+        <article class="metric-card" hidden>
           <div class="card-head"><span>FUZZER REDISCOVERY</span><span id="rediscovery-dot" class="status-dot"></span></div>
           <strong id="rediscovery-status" class="big-status">—</strong>
           <p id="rediscovery-detail" class="caption"></p>
@@ -126,7 +126,7 @@
         <article class="metric-card compact-card">
           <div class="card-head"><span>UNIQUE CRASHES</span><span class="tag">MEDIAN</span></div>
           <div class="split-value"><span>Stock <b id="crash-baseline">—</b></span><span>Guided <b id="crash-guided">—</b></span></div>
-          <p class="caption">Crash는 검증 전까지 variant로 간주하지 않습니다.</p>
+          <p class="caption">Crash 수는 coverage 결과와 별도로 비교합니다.</p>
         </article>
       </section>
 
@@ -136,19 +136,19 @@
           <h3>Target를 더 잘 찾는가?</h3>
           <p id="guided-lane-summary">Target coverage와 AUC만 판정하며 실제 finding과 분리합니다.</p>
         </article>
-        <article class="lane-card rediscovery" id="rediscovery-lane">
+        <article class="lane-card rediscovery" id="rediscovery-lane" hidden>
           <small>PoC-FREE REDISCOVERY</small>
           <h3>PoC 없이 CVE를 다시 찾는가?</h3>
           <p id="rediscovery-lane-summary">등록된 3-build oracle을 통과한 finding만 재발견으로 계산합니다.</p>
         </article>
-        <article class="lane-card variant" id="variant-lane">
+        <article class="lane-card variant" id="variant-lane" hidden>
           <small>VARIANT DISCOVERY</small>
           <h3>Current-upstream variant가 있는가?</h3>
           <p id="variant-lane-summary">최소화·중복 제거·root-cause 확인 전에는 후보 상태를 유지합니다.</p>
         </article>
       </section>
 
-      <section class="discovery-grid" id="discovery-evaluation">
+      <section class="discovery-grid" id="discovery-evaluation" hidden>
         <article class="panel wide">
           <div class="panel-title"><span>DISCOVERY ARM COMPARISON</span><span id="discovery-quality-pill" class="pill">NO DATA</span></div>
           <div id="discovery-arm-comparison" class="discovery-bars"></div>
