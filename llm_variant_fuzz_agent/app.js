@@ -22,6 +22,11 @@ const armMeta = {
 };
 
 const cveBriefs = {
+  'CVE-2021-4102': {
+    component: 'V8 TurboFan', bugClass: 'Type confusion',
+    tldr: 'TurboFan이 ChangeTaggedToInt32와 ChangeInt31ToTaggedSigned 변환을 잘못 상쇄해, tagged-signed임이 보장되지 않은 값을 잘못된 타입으로 사용하는 취약점입니다.',
+    official: [{label: 'NVD ADVISORY', url: 'https://nvd.nist.gov/vuln/detail/CVE-2021-4102'}]
+  },
   'CVE-2020-6418': {
     component: 'TurboFan', bugClass: 'Side-effect modeling',
     tldr: 'TurboFan이 부수 효과 이후에도 객체 map을 신뢰하면서 float와 tagged-pointer element kind가 혼동된 취약점입니다. NodeProperties::InferReceiverMapsUnsafe의 map 신뢰성 판단에서 발생했습니다.',
@@ -37,6 +42,16 @@ const cveBriefs = {
     tldr: 'Arguments object의 keyed-store fast path가 elements 저장소를 늘리면서 PACKED에서 HOLEY로 전환하지 않아 TheHole이 노출된 취약점입니다. 이후 TurboFan 최적화에서 잘못된 타입 추론으로 이어질 수 있습니다.',
     official: [{label: 'V8 REGRESSION TEST', url: 'https://chromium.googlesource.com/v8/v8/+/a5d1a1cc6911f1d1c7f30da136c8f252b05a58dc/test/mjsunit/regress/regress-40065138.js'}]
   },
+  'CVE-2023-0696': {
+    component: 'V8 WebAssembly', bugClass: 'Type confusion',
+    tldr: 'Wasm-to-JS 호출 프레임에서 instance와 source-position 정보를 잘못 다뤄 런타임 타입 전제가 깨지는 취약점입니다. 취약 빌드와 수정 빌드의 회귀 테스트 차등으로 재현했습니다.',
+    official: [{label: 'V8 FIX & TEST', url: 'https://chromium.googlesource.com/v8/v8/+/e17eee4894be67f715a7b2d7f17d8b69724f1cf8'}]
+  },
+  'CVE-2023-1214': {
+    component: 'V8 ValueSerializer', bugClass: 'Type confusion',
+    tldr: '중첩 객체를 역직렬화하는 동안 map이 dictionary mode로 바뀌었는데도 ValueSerializer가 기존 fast transition chain을 계속 따라 객체 layout을 잘못 해석하는 취약점입니다.',
+    official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/b0db6637936a88807b5512a4de68145d0a9d6f02'}]
+  },
   'CVE-2023-4069': {
     component: 'V8 Maglev', bugClass: 'Type confusion',
     tldr: 'Maglev의 constructor 처리에서 필요한 field 검증이 빠져 잘못된 initial map을 가진 객체가 만들어진 취약점입니다. Reflect.construct의 target과 new_target이 다른 경우에 도달할 수 있습니다.',
@@ -51,7 +66,25 @@ const cveBriefs = {
     component: 'V8 Parser', bugClass: 'Type confusion',
     tldr: 'Arrow-function parameter initializer 안의 class static block이 잘못된 ExpressionScope를 상속해 this 사용과 context layout이 불일치한 취약점입니다. Lazy reparsing 과정에서 잘못된 context allocation으로 이어집니다.',
     official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/3e037e195e508dea045f5626862412e8f64fc919'}]
+  },
+  'CVE-2025-13630': {
+    component: 'V8 Maglev', bugClass: 'Type confusion',
+    tldr: 'Maglev의 Array.prototype.slice 최적화 경로가 배열 상태에 대한 타입 전제를 충분히 검증하지 않아 발생하는 type confusion입니다. PoC-free prospective 실험 대상으로 등록했습니다.',
+    official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/00348ef5c3c11842465ca11e7e39706dbe91ed86'}]
   }
+};
+
+const cveExplanations = {
+  'CVE-2020-6418': {where:'TurboFan map inference', cause:'부수 효과 이후에도 이전 객체 map이 유효하다고 가정해 element kind를 혼동합니다.', impact:'힙 메모리 손상과 브라우저 renderer 내 코드 실행으로 이어질 수 있습니다.', fix:'부수 효과가 있는 경로에서는 unsafe map inference 결과를 신뢰하지 않도록 제한합니다.'},
+  'CVE-2021-4102': {where:'TurboFan SimplifiedOperatorReducer', cause:'tagged 값임이 증명되지 않았는데 변환 연산 쌍을 제거해 잘못된 타입을 전달합니다.', impact:'잘못된 정수·tagged 값 해석으로 type confusion이 발생할 수 있습니다.', fix:'입력이 tagged-signed임이 보장된 경우에만 중복 변환을 제거합니다.'},
+  'CVE-2022-4262': {where:'Parser scope / lazy reparse', cause:'lazy parsing과 재파싱 사이의 scope·strictness 정보가 달라 feedback layout이 어긋납니다.', impact:'컴파일러가 값을 잘못된 타입으로 취급해 힙 손상으로 이어질 수 있습니다.', fix:'scope snapshot과 eval bookkeeping을 재파싱 경로에서도 일관되게 유지합니다.'},
+  'CVE-2023-0696': {where:'Wasm-to-JS frame handling', cause:'Wasm-to-JS 프레임의 instance와 source-position 정보를 잘못 연결해 런타임 타입 전제가 깨집니다.', impact:'crafted page가 V8 heap corruption을 유발할 수 있는 High 등급 type confusion입니다.', fix:'프레임에서 올바른 Wasm instance와 source position을 복원하도록 처리 경계를 수정합니다.'},
+  'CVE-2023-1214': {where:'ValueSerializer / Map::Update', cause:'중첩 역직렬화 중 map이 deprecated된 뒤 dictionary map으로 갱신돼도 기존 transition chain을 계속 따릅니다.', impact:'객체 layout을 호환되지 않는 타입으로 해석해 힙 손상으로 이어질 수 있습니다.', fix:'Map::Update가 dictionary map을 반환하면 기존 fast transition 가정을 중단합니다.'},
+  'CVE-2023-3079': {where:'Arguments keyed-store fast path', cause:'elements 저장소 확장 시 PACKED에서 HOLEY로 전환하지 않아 TheHole 값이 노출됩니다.', impact:'잘못된 타입 추론과 메모리 손상으로 이어질 수 있습니다.', fix:'저장소 확장 시 elements kind와 hole 상태를 함께 갱신합니다.'},
+  'CVE-2023-4069': {where:'Maglev constructor lowering', cause:'constructor target과 new_target이 다를 때 initial map 검증 없이 객체를 생성합니다.', impact:'잘못된 object map을 통한 type confusion과 힙 손상이 가능합니다.', fix:'객체 생성 전에 constructor field와 initial map의 호환성을 검증합니다.'},
+  'CVE-2023-4427': {where:'TurboFan for-in optimization', cause:'callback이 property representation을 바꿔도 이전 enumeration cache 길이를 사용합니다.', impact:'descriptor 경계를 벗어난 읽기와 후속 메모리 안전성 문제가 발생할 수 있습니다.', fix:'side effect 이후 enumeration cache와 descriptor 상태를 다시 검증합니다.'},
+  'CVE-2024-5274': {where:'Parser ExpressionScope', cause:'parameter initializer 내부 class static block이 잘못된 ExpressionScope를 상속합니다.', impact:'this와 context layout 불일치로 type confusion이 발생할 수 있습니다.', fix:'static block의 scope와 context allocation을 바깥 initializer와 분리합니다.'},
+  'CVE-2025-13630': {where:'Maglev Array.prototype.slice reduction', cause:'TryReduceArrayPrototypeSlice 최적화가 배열 상태에 대한 불충분한 타입 전제 아래 적용됩니다.', impact:'crafted page가 V8 heap corruption을 유발할 수 있는 High 등급 type confusion입니다.', fix:'slice 최적화 전에 배열 map·elements 조건을 강화하고 불확실하면 일반 경로로 되돌립니다.'}
 };
 
 const studyMetrics = [
@@ -117,9 +150,28 @@ function renderStudyMetric(metric, arms, study) {
       <b><span>${metricValue(value, metric.kind)}</span><small>IQR ${intervalLabel}</small></b>
     </div>`;
   }).join('');
+  const agent = values.agent_loop;
+  const stock = values.stock;
+  const primary = study?.comparisons?.agent_vs_stock?.metrics?.[metric.key] || {};
+  let insight = '비교할 유효 값이 충분하지 않습니다.';
+  if (Number.isFinite(agent) && Number.isFinite(stock)) {
+    const delta = agent - stock;
+    const direction = delta > 0 ? '높고' : delta < 0 ? '낮고' : '같고';
+    const significance = Number.isFinite(primary.p_value)
+      ? `p=${primary.p_value.toFixed(4)}${primary.p_value < .05 ? '로 통계적으로 유의합니다' : '로 유의 기준을 충족하지 않습니다'}`
+      : '유의성 검정값은 없습니다';
+    if (metric.key === 'unique_crashes' || metric.key === 'novel_variant_candidates') {
+      insight = agent === 0 && stock === 0
+        ? `${metric.label}는 Agent와 Stock 모두 0입니다. 이 그래프만으로 실제 취약점 발견 우위를 주장할 수 없습니다.`
+        : `Agent는 ${metricValue(agent, metric.kind)}, Stock은 ${metricValue(stock, metric.kind)}이며 ${significance}.`;
+    } else {
+      insight = `Agent 중앙값은 Stock보다 ${metricValue(Math.abs(delta), metric.kind)} ${direction} ${significance}.`;
+    }
+  }
   return `<section class="study-metric">
     <header><div><b>${metric.label}</b><small>${metric.help} · bar=median, outline=IQR</small></div><span>BEST · ${winnerText}</span></header>
-    <div class="study-rows">${rows}</div>
+    <div class="study-axis"><span>0</span><span>상대 크기</span><span>${metricValue(max, metric.kind)}</span></div>
+    <div class="study-rows">${rows}</div><p class="chart-insight">${insight}</p>
   </section>`;
 }
 
@@ -177,6 +229,12 @@ function renderCveBrief(exp) {
   const component = known.component || exp.component || 'V8';
   const bugClass = known.bugClass || exp.bug_class || 'Unclassified';
   const tldr = known.tldr || `${component}에서 발생한 ${String(bugClass).replaceAll('_', ' ')} 취약점입니다. 현재 대시보드에는 실험 결과가 등록되어 있으며 상세 root-cause 설명은 아직 추가되지 않았습니다.`;
+  const explanation = cveExplanations[exp.cve_id] || {
+    where: component,
+    cause: `${String(bugClass).replaceAll('_', ' ')} 조건에서 V8의 내부 타입 또는 객체 상태 전제가 깨집니다.`,
+    impact: 'V8 메모리 안전성 위반으로 이어질 수 있어 취약·수정 빌드의 차등 검증이 필요합니다.',
+    fix: '패치와 regression test를 기준으로 문제가 된 전제와 경계 검사를 복원합니다.'
+  };
   const links = [
     {label: 'NVD', url: `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(exp.cve_id)}`},
     ...(known.official || [])
@@ -185,6 +243,10 @@ function renderCveBrief(exp) {
   el('cve-brief-title').textContent = exp.cve_id;
   el('cve-taxonomy').innerHTML = `<span>${component}</span><span>${String(bugClass).replaceAll('_', ' ')}</span>`;
   el('cve-tldr').textContent = tldr;
+  el('cve-where').textContent = explanation.where;
+  el('cve-cause').textContent = explanation.cause;
+  el('cve-impact').textContent = explanation.impact;
+  el('cve-fix').textContent = explanation.fix;
   el('cve-links').innerHTML = links.map(link =>
     `<a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.label}<span aria-hidden="true">↗</span></a>`
   ).join('');
@@ -256,19 +318,19 @@ function renderFinalResult(study, cveId) {
     el('final-result-copy').textContent = '이 CVE에는 아직 품질 게이트를 통과한 최종 실험 결과가 없습니다.';
   } else if (positive && rediscovered) {
     el('final-result-badge').textContent = 'CONFIRMED + FINDING';
-    el('final-result-title').textContent = 'Localization improved and the CVE was rediscovered';
+    el('final-result-title').textContent = '취약 영역 탐색 개선과 CVE 재발견을 모두 확인';
     el('final-result-copy').textContent = 'Agent loop가 preregistered target AUC를 개선했고, 퍼징 과정에서 알려진 CVE oracle도 독립적으로 재발견했습니다.';
   } else if (positive) {
     el('final-result-badge').textContent = 'LOCALIZATION POSITIVE';
-    el('final-result-title').textContent = 'Better target localization, no actual rediscovery';
+    el('final-result-title').textContent = '취약 영역 탐색은 개선됐지만 실제 재발견은 없음';
     el('final-result-copy').textContent = 'Agent loop는 Stock보다 target coverage AUC를 유의하게 개선했지만, 이번 퍼징 실행에서 실제 CVE 재발견은 확인되지 않았습니다.';
   } else if (rediscovered) {
     el('final-result-badge').textContent = 'FINDING OBSERVED';
-    el('final-result-title').textContent = 'CVE rediscovered without a localization efficacy claim';
+    el('final-result-title').textContent = 'CVE는 재발견했지만 Agent 효능 우위는 미확정';
     el('final-result-copy').textContent = '실제 CVE 재발견은 관찰됐지만, target coverage AUC 개선은 confirmatory 기준을 충족하지 못했습니다.';
   } else {
     el('final-result-badge').textContent = 'INCONCLUSIVE';
-    el('final-result-title').textContent = 'No confirmatory improvement or actual rediscovery';
+    el('final-result-title').textContent = '확정적인 성능 개선이나 실제 재발견을 확인하지 못함';
     el('final-result-copy').textContent = 'Target coverage AUC 개선이 confirmatory 기준을 충족하지 못했고, 실제 CVE 재발견도 확인되지 않았습니다.';
   }
   el('final-result-delta').textContent = delta == null
@@ -286,6 +348,15 @@ function renderFinalResult(study, cveId) {
     `<span class="${item === status ? 'active' : ''}">${findingLabels[item]}</span>`
   ).join('');
   el('finding-detail').textContent = findingDetails[status];
+  const trials = study?.design?.trials_per_arm;
+  const armCount = Object.keys(study?.arm_metrics || {}).length;
+  el('result-scale').textContent = Number.isFinite(trials)
+    ? `${armCount || 4} arms × ${trials} trials = ${(armCount || 4) * trials} runs` : '실험 규모 정보 없음';
+  el('result-quality').textContent = study
+    ? `${study.result_quality_gate?.status || 'unknown'} · ${study.research_admissible ? 'research admissible' : 'exploratory'}` : 'NO RESULT';
+  el('result-interpretation').textContent = positive
+    ? (rediscovered ? '탐색 위치 개선과 실제 재발견을 모두 확인했습니다.' : '탐색 위치 개선은 확인했지만 실제 finding 개선은 확인하지 못했습니다.')
+    : (rediscovered ? '재발견은 관찰됐지만 Agent 효능 우위는 확정하지 못했습니다.' : 'Agent 효능 및 실제 finding 우위를 모두 확정할 수 없습니다.');
 }
 
 function renderAgentStudy(cve) {
@@ -323,7 +394,7 @@ function latestDiscovery(cveId, experimentType = null) {
 function renderDiscoveryEvaluation(cveId) {
   const rediscovery = latestDiscovery(cveId, 'poc_free_rediscovery');
   const variant = latestDiscovery(cveId, 'variant_discovery');
-  const active = variant || rediscovery;
+  const active = rediscovery || variant;
   const guided = latestStudy(cveId);
   const guidedFinding = guided?.fuzzer_discovery?.status === 'rediscovered';
   el('guided-lane-summary').textContent = guided
@@ -333,8 +404,8 @@ function renderDiscoveryEvaluation(cveId) {
     ? `품질 gate ${rediscovery.quality_gate?.status || 'unknown'} · confirmed known-CVE ${rediscovery.coverage_finding_separation?.confirmed_known_cve_count || 0}`
     : 'PoC-free rediscovery 결과가 없습니다.';
   el('variant-lane-summary').textContent = variant
-    ? `confirmed variant ${variant.coverage_finding_separation?.confirmed_variant_count || 0} · 자동 확정 없음`
-    : 'Variant-discovery 결과가 없습니다.';
+    ? `과거 호환 결과 · confirmed variant ${variant.coverage_finding_separation?.confirmed_variant_count || 0}`
+    : '과거 Variant-discovery 결과가 없습니다.';
 
   if (!active) {
     el('discovery-quality-pill').textContent = 'NO DATA';
@@ -342,6 +413,9 @@ function renderDiscoveryEvaluation(cveId) {
     el('trigger-funnel').innerHTML = '<p class="caption">No trigger evidence</p>';
     el('discovery-findings').innerHTML = '<p class="caption">No finding evidence</p>';
     el('discovery-cost').innerHTML = '<p class="caption">No cost evidence</p>';
+    el('discovery-arm-insight').textContent = 'Discovery arm 결과가 없어 탐색 폭이나 finding 성능을 비교할 수 없습니다.';
+    el('trigger-insight').textContent = 'Trigger 단계 도달 증거가 없습니다.';
+    el('cost-insight').textContent = 'Provider 사용량과 finding당 비용을 계산할 실행 결과가 없습니다.';
   } else {
     const arms = active.arm_summary || {};
     el('discovery-quality-pill').textContent = `${active.experiment_type} · ${active.quality_gate?.status || 'unknown'}`;
@@ -349,21 +423,34 @@ function renderDiscoveryEvaluation(cveId) {
     el('discovery-arm-comparison').innerHTML = Object.entries(arms).map(([name, row]) =>
       `<div class="discovery-bar-row ${name}"><b>${name.replaceAll('_',' ')}</b><span class="discovery-track"><i style="width:${Number(row.edge_coverage_median || 0) / maxEdge * 100}%"></i></span><small>edge ${fmt(row.edge_coverage_median)} · finding ${Number(row.rediscoveries || 0) + Number(row.confirmed_variants || 0)}</small></div>`
     ).join('');
+    const edgeLeader = Object.entries(arms).sort((a,b) => Number(b[1].edge_coverage_median || 0) - Number(a[1].edge_coverage_median || 0))[0];
+    const totalFindings = Object.values(arms).reduce((n,row) => n + Number(row.rediscoveries || 0) + Number(row.confirmed_variants || 0), 0);
+    el('discovery-arm-insight').textContent = edgeLeader
+      ? `${armMeta[edgeLeader[0]]?.label || edgeLeader[0].replaceAll('_',' ')}가 edge coverage 중앙값 ${fmt(edgeLeader[1].edge_coverage_median)}로 가장 넓게 탐색했습니다. 전체 confirmed finding은 ${totalFindings}개입니다.`
+      : '유효한 arm 비교값이 없습니다.';
     const agent = arms.agent_loop || {};
     const funnel = agent.trigger_stage_reach_rate || {};
     el('trigger-funnel').innerHTML = [1,2,3,4,5].map(stage => {
       const rate = Number(funnel[String(stage)] || 0);
       return `<div class="funnel-row"><b>STAGE ${stage}</b><i style="width:${rate * 100}%"></i><small>${fmt(rate * 100)}%</small></div>`;
     }).join('');
+    const reachedStages = [1,2,3,4,5].filter(stage => Number(funnel[String(stage)] || 0) > 0);
+    const deepest = reachedStages.length ? Math.max(...reachedStages) : 0;
+    el('trigger-insight').textContent = deepest
+      ? `Agent arm은 최대 trigger stage ${deepest}까지 도달했습니다. 뒤 단계로 갈수록 비율이 줄면 trigger 조건 조합이 병목입니다.`
+      : 'Agent arm이 등록된 trigger stage에 도달하지 못했습니다.';
     const validations = active.candidate_validations || [];
     const statuses = validations.map(row => row?.confirmation?.status).filter(Boolean);
-    el('discovery-findings').innerHTML = [
+    const findingRows = [
       ['Candidates', Object.values(arms).reduce((n,row)=>n+Number(row.candidates||0),0)],
       ['Known-CVE rediscoveries', active.coverage_finding_separation?.confirmed_known_cve_count || 0],
-      ['Confirmed variants', active.coverage_finding_separation?.confirmed_variant_count || 0],
       ['Validation status', active.candidate_validation_status || 'unknown'],
       ['Evidence states', statuses.join(', ') || 'none']
-    ].map(([name,value]) => `<div class="finding-datum"><span>${name}</span><b>${value}</b></div>`).join('');
+    ];
+    if (active.experiment_type === 'variant_discovery') {
+      findingRows.splice(2, 0, ['Confirmed variants', active.coverage_finding_separation?.confirmed_variant_count || 0]);
+    }
+    el('discovery-findings').innerHTML = findingRows.map(([name,value]) => `<div class="finding-datum"><span>${name}</span><b>${value}</b></div>`).join('');
     const costs = active.discovery_costs || {};
     el('discovery-cost').innerHTML = [
       ['Provider calls', costs.provider_calls], ['Tokens', Number(costs.input_tokens||0)+Number(costs.output_tokens||0)],
@@ -372,6 +459,9 @@ function renderDiscoveryEvaluation(cveId) {
       ['Cost / candidate', costs.cost_per_candidate == null ? 'n/a' : `$${Number(costs.cost_per_candidate).toFixed(4)}`],
       ['Cost / confirmed finding', costs.cost_per_confirmed_finding == null ? 'n/a' : `$${Number(costs.cost_per_confirmed_finding).toFixed(4)}`]
     ].map(([name,value]) => `<div class="cost-datum"><span>${name}</span><b>${value ?? '—'}</b></div>`).join('');
+    el('cost-insight').textContent = totalFindings > 0
+      ? `${costs.provider_calls ?? '—'}회 provider 호출로 confirmed finding ${totalFindings}개를 얻었습니다. 가격표가 고정된 경우에만 달러 비용을 비교할 수 있습니다.`
+      : `${costs.provider_calls ?? '—'}회 provider 호출이 있었지만 confirmed finding은 0개여서 finding당 비용은 산출할 수 없습니다.`;
   }
 
   const forest = discoveryStudies.filter(row => !row.fixture).map(row => ({
@@ -383,6 +473,13 @@ function renderDiscoveryEvaluation(cveId) {
   el('discovery-forest').innerHTML = forest.length ? forest.map(row =>
     `<div class="forest-row"><b>${row.cve}<small> ${row.type}</small></b><span class="forest-axis">${Array.isArray(row.ci) ? `<i class="forest-ci" style="left:${row.ci[0]*100}%;width:${Math.max(1,(row.ci[1]-row.ci[0])*100)}%"></i>` : ''}<i class="forest-point" style="left:${Math.max(0,Math.min(100,row.effect*100))}%"></i></span><small>A12 ${Number(row.effect).toFixed(2)}</small></div>`
   ).join('') : '<p class="caption">Forest plot에 표시할 실제 discovery effect가 없습니다.</p>';
+  if (forest.length) {
+    const agentFavored = forest.filter(row => row.effect > .5).length;
+    const neutral = forest.filter(row => row.effect === .5).length;
+    el('forest-insight').textContent = `${forest.length}개 discovery 효과 중 ${agentFavored}개가 Agent 방향(A12 > 0.5), ${neutral}개가 동률입니다. 신뢰구간이 0.5를 가로지르면 우위를 확정할 수 없습니다.`;
+  } else {
+    el('forest-insight').textContent = '비교 가능한 discovery effect와 신뢰구간이 아직 없습니다.';
+  }
 }
 
 function renderCampaign() {
@@ -407,14 +504,37 @@ function render(exp) {
     b.classList.toggle('active', active);
     b.setAttribute('aria-selected', active ? 'true' : 'false');
   });
-  const edge = exp.metrics.edge_coverage || {};
-  const crashes = exp.metrics.unique_crashes || {};
+  const studyEdge = study?.comparisons?.agent_vs_stock?.metrics?.edge_coverage || {};
+  const edge = exp.metrics?.edge_coverage || {
+    baseline_median: study?.arm_metrics?.stock?.edge_coverage,
+    guided_median: study?.arm_metrics?.agent_loop?.edge_coverage,
+    a12: studyEdge.a12,
+    a12_magnitude: studyEdge.a12_magnitude,
+    p_value: studyEdge.p_value
+  };
+  const studyCrashes = study?.comparisons?.agent_vs_stock?.metrics?.unique_crashes || {};
+  const crashes = exp.metrics?.unique_crashes || {
+    baseline_median: study?.arm_metrics?.stock?.unique_crashes ?? studyCrashes.baseline_median,
+    guided_median: study?.arm_metrics?.agent_loop?.unique_crashes ?? studyCrashes.guided_median
+  };
   const max = Math.max(edge.guided_median || 0, edge.baseline_median || 0, 1);
   el('edge-baseline').textContent = fmt(edge.baseline_median);
   el('edge-guided').textContent = fmt(edge.guided_median);
   el('edge-effect').textContent = `A12 ${fmt(edge.a12)}`;
-  el('edge-bars').innerHTML = `<div class="bar stock"><i style="width:${(edge.baseline_median||0)/max*100}%"></i></div><div class="bar guided"><i style="width:${(edge.guided_median||0)/max*100}%"></i></div>`;
+  el('edge-bars').innerHTML = `<div class="edge-axis"><span>0</span><span>EDGE COVERAGE</span><span>${fmt(max)}</span></div>
+    <div class="edge-bar-row"><b>Stock</b><div class="bar stock"><i style="width:${(edge.baseline_median||0)/max*100}%"></i></div><strong>${fmt(edge.baseline_median)}</strong></div>
+    <div class="edge-bar-row"><b>Guided</b><div class="bar guided"><i style="width:${(edge.guided_median||0)/max*100}%"></i></div><strong>${fmt(edge.guided_median)}</strong></div>`;
   el('edge-caption').textContent = `guided uplift ${pct(exp.edge_uplift_percent)} · ${edge.a12_magnitude || 'n/a'} effect · p ${edge.p_value == null ? 'not computed' : fmt(edge.p_value)}`;
+  if (Number.isFinite(edge.guided_median) && Number.isFinite(edge.baseline_median)) {
+    const delta = edge.guided_median - edge.baseline_median;
+    el('edge-insight').textContent = delta > 0
+      ? `Guided가 Stock보다 ${fmt(delta)}개 많은 edge를 탐색했습니다. 이는 탐색 폭의 증가이며 실제 취약점 finding과는 별도입니다.`
+      : delta < 0
+        ? `Guided가 Stock보다 ${fmt(Math.abs(delta))}개 적은 edge를 탐색했습니다. target AUC가 높다면 넓이보다 취약 영역 집중도가 높았다는 뜻입니다.`
+        : 'Guided와 Stock의 edge coverage 중앙값이 같습니다.';
+  } else {
+    el('edge-insight').textContent = 'Edge coverage 비교값이 없습니다.';
+  }
   const poc = study?.poc_evidence || exp.poc_evidence || {
     status: exp.poc_reproduced ? 'verified' : 'not_checked',
     detail: exp.poc_reproduced ? 'legacy PoC check passed' : 'no PoC verification evidence is registered'
@@ -439,9 +559,15 @@ function render(exp) {
   el('rediscovery-status').textContent = rediscoveryView[0];
   el('rediscovery-dot').className = `status-dot ${rediscoveryView[1]}`;
   el('rediscovery-detail').textContent = rediscovery.detail;
-  const target = exp.target_coverage || {};
+  const studyTarget = study?.arm_metrics?.agent_loop?.target_function_coverage;
+  const target = (exp.target_coverage && Object.keys(exp.target_coverage).length)
+    ? exp.target_coverage
+    : (Number.isFinite(studyTarget)
+      ? {status:'available', reason:'Agent-study report의 instrumented target map을 사용했습니다.'}
+      : {});
   el('target-tag').textContent = target.status || 'unknown';
-  el('target-value').textContent = target.status === 'available' ? fmt(exp.metrics.target_function_coverage?.guided_median) : 'UNAVAILABLE';
+  el('target-value').textContent = target.status === 'available'
+    ? metricValue(exp.metrics?.target_function_coverage?.guided_median ?? studyTarget, 'ratio') : 'UNAVAILABLE';
   el('target-reason').textContent = target.reason || 'Instrumented target map is available.';
   el('crash-baseline').textContent = fmt(crashes.baseline_median);
   el('crash-guided').textContent = fmt(crashes.guided_median);
