@@ -69,7 +69,7 @@ const cveBriefs = {
   },
   'CVE-2025-13630': {
     component: 'V8 Maglev', bugClass: 'Type confusion',
-    tldr: 'Maglev의 Array.prototype.slice 최적화 경로가 배열 상태에 대한 타입 전제를 충분히 검증하지 않아 발생하는 type confusion입니다. PoC-free prospective 실험 대상으로 등록했습니다.',
+    tldr: 'Maglev의 Array.prototype.slice 최적화 경로가 배열 상태에 대한 타입 전제를 충분히 검증하지 않아 발생하는 type confusion입니다. 패치에서 고정한 target에 대한 guided localization 대상으로 등록했습니다.',
     official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/00348ef5c3c11842465ca11e7e39706dbe91ed86'}]
   }
 };
