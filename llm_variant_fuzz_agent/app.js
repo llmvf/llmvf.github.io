@@ -286,18 +286,28 @@ function renderFinalResult(study, cveId) {
   const stockAuc = study?.arm_metrics?.stock?.target_coverage_auc;
   const delta = Number.isFinite(agentAuc) && Number.isFinite(stockAuc)
     ? (agentAuc - stockAuc) * 100 : null;
-  const status = findingStatus(study, cveId);
-  const positive = decision === 'confirmatory_positive';
+  const status = study ? findingStatus(study, cveId) : null;
+  const currentStudy = study?.study_level === 'guided_localization';
+  const positive = currentStudy && study?.research_admissible === true
+    && decision === 'confirmatory_positive';
   panel.classList.toggle('inconclusive', !positive);
 
   if (!study) {
     el('final-result-badge').textContent = 'NO RESULT';
     el('final-result-title').textContent = 'No completed experiment result';
     el('final-result-copy').textContent = '이 CVE에는 아직 품질 게이트를 통과한 최종 실험 결과가 없습니다.';
+  } else if (!currentStudy) {
+    el('final-result-badge').textContent = 'ARCHIVED';
+    el('final-result-title').textContent = '과거 재현 실험 결과';
+    el('final-result-copy').textContent = '현재 guided-localization 연구 질문의 근거에서는 제외됩니다. 아래 수치는 과거 실험 기록입니다.';
   } else if (positive) {
     el('final-result-badge').textContent = 'LOCALIZATION POSITIVE';
-    el('final-result-title').textContent = '취약 영역 탐색 개선을 확인';
-    el('final-result-copy').textContent = 'Agent loop가 Stock보다 target coverage AUC를 유의하게 개선했습니다.';
+    el('final-result-title').textContent = '이 CVE에서 target 탐색 개선을 확인';
+    el('final-result-copy').textContent = 'Agent loop가 이 CVE의 Stock보다 target coverage AUC를 유의하게 개선했습니다. CVE 간 일반화와 비용은 별도 보조 분석입니다.';
+  } else if (decision === 'confirmatory_positive') {
+    el('final-result-badge').textContent = 'EXPLORATORY SIGNAL';
+    el('final-result-title').textContent = 'Target 탐색 개선 신호';
+    el('final-result-copy').textContent = '통계적 신호는 있으나 연구 입장 조건이 남아 있어 확정적 효능 주장에는 사용하지 않습니다.';
   } else {
     el('final-result-badge').textContent = 'INCONCLUSIVE';
     el('final-result-title').textContent = '확정적인 target 탐색 개선을 확인하지 못함';
@@ -307,21 +317,23 @@ function renderFinalResult(study, cveId) {
     ? '—' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%p`;
   el('final-result-p').textContent = Number.isFinite(comparison.p_value)
     ? comparison.p_value.toFixed(4) : '—';
-  el('final-result-finding').textContent = findingLabels[status];
+  el('final-result-finding').textContent = status ? findingLabels[status] : '—';
   const ladder = ['target_not_reached', 'target_reached'];
-  el('finding-ladder').innerHTML = ladder.map(item =>
+  el('finding-ladder').innerHTML = status ? ladder.map(item =>
     `<span class="${item === status ? 'active' : ''}">${findingLabels[item]}</span>`
-  ).join('');
-  el('finding-detail').textContent = findingDetails[status];
+  ).join('') : '';
+  el('finding-detail').textContent = status ? findingDetails[status] : '완료된 target 도달 측정이 없습니다.';
   const trials = study?.design?.trials_per_arm;
   const armCount = Object.keys(study?.arm_metrics || {}).length;
   el('result-scale').textContent = Number.isFinite(trials)
     ? `${armCount || 4} arms × ${trials} trials = ${(armCount || 4) * trials} runs` : '실험 규모 정보 없음';
   el('result-quality').textContent = study
-    ? `${study.result_quality_gate?.status || 'unknown'} · ${study.research_admissible ? 'research admissible' : 'exploratory'}` : 'NO RESULT';
-  el('result-interpretation').textContent = positive
-    ? 'Agent의 target 탐색 개선을 확인했습니다.'
-    : 'Agent의 target 탐색 우위를 확정할 수 없습니다.';
+    ? `${study.result_quality_gate?.status || 'unknown'} · ${!currentStudy ? 'archived' : study.research_admissible ? 'research admissible' : 'exploratory'}` : 'NO RESULT';
+  el('result-interpretation').textContent = !study
+    ? '완료된 결과가 없습니다.'
+    : !currentStudy ? '현재 연구 질문에서 제외한 과거 기록입니다.'
+      : positive ? 'Agent의 target 탐색 개선을 확인했습니다.'
+        : 'Agent의 target 탐색 우위를 확정할 수 없습니다.';
 }
 
 function renderAgentStudy(cve) {
@@ -334,17 +346,18 @@ function renderAgentStudy(cve) {
   const arms = study.arm_metrics || {};
   const trials = study.design?.trials_per_arm;
   const evidenceReady = study.research_admissible === true;
+  const currentStudy = study.study_level === 'guided_localization';
   const modelPinned = study.design?.llm_model && study.design.llm_model !== 'default';
   const efficacyReady = Number.isFinite(trials) && trials >= 10 && evidenceReady && modelPinned;
   const targetWinners = winnersFor(Object.fromEntries(Object.keys(armMeta).map(arm => [arm, arms?.[arm]?.target_coverage_auc])));
   const edgeWinners = winnersFor(Object.fromEntries(Object.keys(armMeta).map(arm => [arm, arms?.[arm]?.edge_coverage])));
   const targetNames = targetWinners.map(arm => armMeta[arm].label).join(' + ') || '측정 불가';
   const edgeNames = edgeWinners.map(arm => armMeta[arm].label).join(' + ') || '측정 불가';
-  el('agent-study-pill').textContent = `${trials ?? '—'} TRIALS / ARM · ${efficacyReady ? 'EFFICACY' : 'EXPLORATORY'}`;
+  el('agent-study-pill').textContent = `${trials ?? '—'} TRIALS / ARM · ${!currentStudy ? 'ARCHIVED' : efficacyReady ? 'EFFICACY' : 'EXPLORATORY'}`;
   el('agent-study').innerHTML = `<div class="study-summary">
       <div><small>TARGET SEARCH LEADER</small><b>${targetNames}</b></div>
       <div><small>SEARCH BREADTH LEADER</small><b>${edgeNames}</b></div>
-      <div class="confidence ${efficacyReady ? 'ready' : 'smoke'}"><small>EVIDENCE LEVEL</small><b>${efficacyReady ? '효능 비교 가능' : '탐색적 결과'}</b><p>${efficacyReady ? 'PoC 차등·모델 고정·반복 수 기준을 충족했습니다.' : 'PoC 차등, 명시적 모델, n ≥ 10을 모두 충족해야 효능 결론에 포함됩니다.'}</p></div>
+      <div class="confidence ${efficacyReady ? 'ready' : 'smoke'}"><small>EVIDENCE LEVEL</small><b>${!currentStudy ? '과거 재현 실험' : efficacyReady ? 'CVE별 RQ1·RQ2 비교 가능' : '탐색적 결과'}</b><p>${efficacyReady ? `독립 target·paired RNG·모델 고정 기준을 충족했습니다. 보조 RQ3의 금전 비용은 ${study.monetary_cost_available ? '기록됨' : '미산출'}입니다.` : (study.admissibility_blockers || ['admission contract incomplete']).join(' · ')}</p></div>
     </div>
     <div class="study-chart-grid">${studyMetrics.map(metric => renderStudyMetric(metric, arms, study)).join('')}</div>`;
 }
@@ -362,9 +375,9 @@ function renderDiscoveryEvaluation(cveId) {
   const active = rediscovery || variant;
   const guided = latestStudy(cveId);
   const guidedFinding = guided?.fuzzer_discovery?.status === 'rediscovered';
-  el('guided-lane-summary').textContent = guided
+  el('guided-lane-summary').textContent = guided?.study_level === 'guided_localization'
     ? `Target AUC 판정: ${guided.statistical_decision?.level || '미판정'} · 실제 finding ${guidedFinding ? '있음' : '없음'}`
-    : 'Guided/localization 결과가 없습니다.';
+    : '현재 연구 질문에 맞는 guided-localization 결과가 없습니다.';
   el('rediscovery-lane-summary').textContent = rediscovery
     ? `품질 gate ${rediscovery.quality_gate?.status || 'unknown'} · confirmed known-CVE ${rediscovery.coverage_finding_separation?.confirmed_known_cve_count || 0}`
     : 'PoC-free rediscovery 결과가 없습니다.';
@@ -550,10 +563,18 @@ function render(exp) {
   el('seed-pill').textContent = compiled ? `${compiled.compiled}/${compiled.requested} seeds` : 'no seed data';
   el('guidance').innerHTML = Object.entries(applied).map(([k,v]) => `<div class="guide-row"><span>${k.replaceAll('_',' ')}</span><b class="${v?'yes':'no'}">${v?'APPLIED':'NOT APPLIED'}</b></div>`).join('');
 
-  const enough = !!d.recommended_repetitions_met, paired = !!d.paired_seed_lineage;
+  const enough = study
+    ? Number(study.design?.trials_per_arm || 0) >= 10
+    : !!d.recommended_repetitions_met;
+  const paired = study
+    ? study.comparisons?.agent_vs_stock?.metrics?.target_coverage_auc?.pairing_valid === true
+    : !!d.paired_seed_lineage;
   const targetReady = target.status === 'available';
+  const pocForReproductionOnly = study?.study_level === 'guided_localization';
   el('gates').innerHTML = [
-    gate('KNOWN PoC DIFFERENTIAL', poc.differential_verified ? 'pass' : poc.status === 'failed' ? 'fail' : 'warn', pocView[0]),
+    gate(pocForReproductionOnly ? 'PoC DIFFERENTIAL · REPRODUCTION ONLY' : 'KNOWN PoC DIFFERENTIAL',
+      poc.differential_verified ? 'pass' : poc.status === 'failed' ? 'fail' : 'warn',
+      pocForReproductionOnly && !poc.differential_verified ? 'RQ1·RQ2 target localization에는 필수 아님' : pocView[0]),
     gate('BUDGET PARITY', d.identical_budget_verified?'pass':'fail', d.identical_budget_verified?'arms use the same limits':'budget mismatch'),
     gate('REPETITIONS', enough?'pass':'warn', enough?'n ≥ 10':'smoke only; n < 10'),
     gate('RNG PAIRING', paired?'pass':'warn', paired?'paired inference enabled':'CLI cannot fix RNG seed'),
@@ -561,14 +582,21 @@ function render(exp) {
   ].join('');
   const evidenceAdmissible = study?.research_admissible === true;
   const explicitModel = study?.design?.llm_model && study.design.llm_model !== 'default';
-  el('verdict').textContent = enough && paired && targetReady && evidenceAdmissible && explicitModel ? 'EFFICACY-READY' : 'EXPLORATORY · NOT A CONFIRMATORY EFFICACY CLAIM';
+  el('verdict').textContent = study && study.study_level !== 'guided_localization'
+    ? 'ARCHIVED · OUTSIDE CURRENT RESEARCH QUESTION'
+    : enough && paired && targetReady && evidenceAdmissible && explicitModel
+      ? 'EFFICACY-READY' : 'EXPLORATORY · NOT A CONFIRMATORY EFFICACY CLAIM';
   renderAgentStudy(exp.cve_id);
 }
 
-fetch('data/results.json').then(r => r.json()).then(data => {
+fetch('data/results.json', {cache: 'no-store'}).then(r => r.json()).then(data => {
   agentStudies = data.agent_studies || [];
   campaigns = data.campaigns || [];
   discoveryStudies = data.discovery_studies || [];
+  const guidedStudies = agentStudies.filter(item => item.study_level === 'guided_localization');
+  const admittedStudies = guidedStudies.filter(item => item.research_admissible === true);
+  el('evidence-overview').textContent = `Guided localization ${guidedStudies.length}건 완료 · CVE별 RQ1·RQ2 입장 ${admittedStudies.length}건`;
+  el('evidence-snapshot').textContent = `RQ3 일반화·비용은 보조 분석 · 과거 재현 ${agentStudies.length - guidedStudies.length}건 별도 보존 · ${new Date(data.generated_at).toLocaleString('ko-KR')} 기준`;
   const experiments = [...data.experiments];
   const represented = new Set(experiments.map(exp => exp.cve_id));
   agentStudies.forEach(study => {

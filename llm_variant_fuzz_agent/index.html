@@ -36,7 +36,13 @@
         <p class="eyebrow">EXPERIMENT SUMMARY</p>
         <h1>Did the agent<br><em>guide the search better?</em></h1>
         <p class="research-question"><b>Research question</b> — 동일한 실행 예산에서 검증된 LLM guidance와 feedback이 Stock Fuzzilli보다 patch-derived target의 coverage AUC를 높이는가?</p>
+        <p class="research-question">주 질문: RQ1 유도 효과 · RQ2 반복 feedback의 추가 효과. 보조 RQ3: CVE 간 일반화와 LLM 비용.</p>
       </div>
+      <aside class="hero-note" aria-label="연구 근거 현황">
+        <span class="hero-note-label">CURRENT EVIDENCE</span>
+        <p id="evidence-overview">결과 스냅샷을 불러오는 중입니다.</p>
+        <small id="evidence-snapshot">과거 재현 실험과 현재 guided-localization 근거를 구분합니다.</small>
+      </aside>
     </section>
 
     <section class="detail-section" id="detail">
@@ -202,7 +208,7 @@
 
     <footer><span id="generated"></span><span>실제 finding과 target coverage를 별도 지표로 해석합니다.</span></footer>
   </main>
-  <script src="app.js?v=evidence-20261013-1"></script>
+  <script src="app.js?v=evidence-20261014-2"></script>
   <script>
     const themeButton=document.querySelector('.theme-toggle');
     const syncThemeButton=()=>themeButton.querySelector('span').textContent=document.documentElement.dataset.theme==='dark'?'☀':'☾';
