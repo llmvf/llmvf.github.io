@@ -9,7 +9,7 @@
   <meta http-equiv="Expires" content="0">
   <title>LLMVF · Experiment Results</title>
   <script>document.documentElement.dataset.theme=localStorage.getItem('llmvf-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');</script>
-  <link rel="stylesheet" href="styles.css?v=evidence-20261013-1">
+  <link rel="stylesheet" href="styles.css?v=research-20261016-1">
 </head>
 <body>
   <header class="topbar">
@@ -36,13 +36,40 @@
         <p class="eyebrow">EXPERIMENT SUMMARY</p>
         <h1>Did the agent<br><em>guide the search better?</em></h1>
         <p class="research-question"><b>Research question</b> — 동일한 실행 예산에서 검증된 LLM guidance와 feedback이 Stock Fuzzilli보다 patch-derived target의 coverage AUC를 높이는가?</p>
-        <p class="research-question">주 질문: RQ1 유도 효과 · RQ2 반복 feedback의 추가 효과. 보조 RQ3: CVE 간 일반화와 LLM 비용.</p>
+        <p class="research-question">주 질문: RQ1 One-shot·Agent 각각 Stock 대비 유도 효과 · RQ2 Agent의 One-shot·Heuristic 대비 반복 feedback 추가 효과. RQ3 일반화·비용은 표본과 가격 근거가 쌓일 때까지 보조 분석입니다. 표적 코드 도달은 CVE 재발견이 아니며, 과거 PoC 재현은 운영 검증 기록입니다.</p>
       </div>
       <aside class="hero-note" aria-label="연구 근거 현황">
         <span class="hero-note-label">CURRENT EVIDENCE</span>
         <p id="evidence-overview">결과 스냅샷을 불러오는 중입니다.</p>
         <small id="evidence-snapshot">과거 재현 실험과 현재 guided-localization 근거를 구분합니다.</small>
       </aside>
+    </section>
+
+    <section class="research-overview" aria-labelledby="research-overview-title">
+      <div class="section-title">
+        <div><span>AUDITED RESEARCH RESULTS</span><h2 id="research-overview-title">현재 근거가 말하는 것</h2></div>
+        <a class="source-link" href="https://github.com/llmvf/llm_variant_fuzz_agent/blob/main/reports/research_readiness.json" target="_blank" rel="noopener noreferrer">집계 감사 원본 ↗</a>
+      </div>
+      <div class="research-kpis">
+        <article><small>채택된 Guided CVE</small><strong id="research-scope">—</strong><span>목표 범위와 구분</span></article>
+        <article><small>RQ1 · Agent 대 Stock</small><strong id="research-rq1">—</strong><span>A12 방향, CVE별 기술 통계</span></article>
+        <article><small>RQ2 · 반복 feedback</small><strong id="research-rq2">—</strong><span>양쪽 대안 대비 추가 우위</span></article>
+      </div>
+      <p class="research-caveat" id="research-caveat">연구 감사 결과를 불러오는 중입니다.</p>
+      <div class="research-chart-grid">
+        <article class="panel research-chart-panel">
+          <div class="panel-title"><span>RQ1 · AGENT − STOCK</span><span>target AUC 중앙값 차이 · %p</span></div>
+          <div class="delta-legend"><span><i class="negative"></i>Stock 방향</span><span><i class="positive"></i>Agent 방향</span></div>
+          <div id="research-rq1-chart" class="delta-chart"></div>
+          <p class="chart-insight">각 막대는 채택된 CVE 한 건의 AUC 중앙값 차이입니다. CVE 간 효과를 합친 추정치가 아닙니다.</p>
+        </article>
+        <article class="panel research-chart-panel">
+          <div class="panel-title"><span>RQ2 · AGENT 추가 효과</span><span>A12 · 0.50 = 동률</span></div>
+          <div id="research-rq2-chart" class="rq2-chart"></div>
+          <p class="chart-insight">One-shot·Heuristic 모두에 대한 CVE별 비교입니다. 색은 방향만 나타내며 유의성이나 CVE 간 일반화를 뜻하지 않습니다.</p>
+        </article>
+      </div>
+      <p class="research-source" id="research-source"></p>
     </section>
 
     <section class="detail-section" id="detail">
@@ -208,7 +235,7 @@
 
     <footer><span id="generated"></span><span>실제 finding과 target coverage를 별도 지표로 해석합니다.</span></footer>
   </main>
-  <script src="app.js?v=evidence-20261014-2"></script>
+  <script src="app.js?v=research-20261016-1"></script>
   <script>
     const themeButton=document.querySelector('.theme-toggle');
     const syncThemeButton=()=>themeButton.querySelector('span').textContent=document.documentElement.dataset.theme==='dark'?'☀':'☾';

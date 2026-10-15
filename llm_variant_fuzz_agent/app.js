@@ -71,6 +71,16 @@ const cveBriefs = {
     component: 'V8 Maglev', bugClass: 'Type confusion',
     tldr: 'Maglev의 Array.prototype.slice 최적화 경로가 배열 상태에 대한 타입 전제를 충분히 검증하지 않아 발생하는 type confusion입니다. 패치에서 고정한 target에 대한 guided localization 대상으로 등록했습니다.',
     official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/00348ef5c3c11842465ca11e7e39706dbe91ed86'}]
+  },
+  'CVE-2025-12433': {
+    component: 'V8 Ignition', bugClass: 'Hole-check elision',
+    tldr: 'Ignition bytecode 생성 과정에서 필요한 hole check가 제거될 수 있는 취약점입니다. 이 실험은 패치 유래 target map의 탐색을 측정하며 취약점 재현을 뜻하지 않습니다.',
+    official: [{label: 'V8 FIX COMMIT', url: 'https://chromium.googlesource.com/v8/v8/+/b371b4f8ba073fb5c054273e8909bee5de574b35'}]
+  },
+  'CVE-2026-11645': {
+    component: 'V8', bugClass: 'Patch-guided target',
+    tldr: '사전에 고정한 패치 유래 target에 대한 guided localization 비교입니다. 이 CVE에서는 guided arm의 Stock 대비 개선이 확인되지 않았습니다.',
+    official: []
   }
 };
 
@@ -177,6 +187,11 @@ function renderStudyMetric(metric, arms, study) {
 function selectExperiment(cve, scroll = true) {
   const exp = allExperiments.find(item => item.cve_id === cve);
   if (!exp) return;
+  if (activeYear !== 'all' && cveYear(cve) !== activeYear) {
+    activeYear = 'all';
+    renderYearFilter();
+    renderCveTabs();
+  }
   render(exp);
   if (scroll) el('detail').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
@@ -290,6 +305,9 @@ function renderFinalResult(study, cveId) {
   const currentStudy = study?.study_level === 'guided_localization';
   const positive = currentStudy && study?.research_admissible === true
     && decision === 'confirmatory_positive';
+  const oneShot = study?.comparisons?.one_shot_vs_stock?.metrics?.target_coverage_auc || {};
+  const oneShotPositive = oneShot['significant_0.05'] === true
+    && Number(oneShot.guided_median) > Number(oneShot.baseline_median);
   panel.classList.toggle('inconclusive', !positive);
 
   if (!study) {
@@ -303,15 +321,21 @@ function renderFinalResult(study, cveId) {
   } else if (positive) {
     el('final-result-badge').textContent = 'LOCALIZATION POSITIVE';
     el('final-result-title').textContent = '이 CVE에서 target 탐색 개선을 확인';
-    el('final-result-copy').textContent = 'Agent loop가 이 CVE의 Stock보다 target coverage AUC를 유의하게 개선했습니다. CVE 간 일반화와 비용은 별도 보조 분석입니다.';
+    el('final-result-copy').textContent = `RQ1에서 ${oneShotPositive ? 'LLM one-shot과 Agent loop의' : 'Agent loop의'} Stock 대비 target coverage AUC 개선을 확인했습니다. RQ2의 반복 feedback 추가 효과는 아래 별도 비교를 확인하세요. CVE 간 일반화와 비용은 보조 분석입니다.${cveId === 'CVE-2025-12433' ? ' 이 결과는 9개 심볼을 묶은 target map에 대한 것이며 대표 함수 단독 효과가 아닙니다.' : ''}`;
   } else if (decision === 'confirmatory_positive') {
     el('final-result-badge').textContent = 'EXPLORATORY SIGNAL';
     el('final-result-title').textContent = 'Target 탐색 개선 신호';
     el('final-result-copy').textContent = '통계적 신호는 있으나 연구 입장 조건이 남아 있어 확정적 효능 주장에는 사용하지 않습니다.';
   } else {
-    el('final-result-badge').textContent = 'INCONCLUSIVE';
-    el('final-result-title').textContent = '확정적인 target 탐색 개선을 확인하지 못함';
-    el('final-result-copy').textContent = 'Target coverage AUC 개선이 confirmatory 기준을 충족하지 못했습니다.';
+    const stockFavored = currentStudy && study?.research_admissible === true
+      && Number.isFinite(delta) && delta < 0;
+    el('final-result-badge').textContent = stockFavored ? 'STOCK-FAVORED DIRECTION' : 'INCONCLUSIVE';
+    el('final-result-title').textContent = stockFavored
+      ? '이 CVE에서는 Stock의 target AUC가 더 높음'
+      : '확정적인 target 탐색 개선을 확인하지 못함';
+    el('final-result-copy').textContent = stockFavored
+      ? 'Agent의 중앙값이 Stock보다 낮았습니다. 이 방향성은 그대로 보존하지만, Agent 우위를 검정한 p값만으로 Stock 우위의 통계적 확정을 주장하지 않습니다.'
+      : 'Target coverage AUC 개선이 confirmatory 기준을 충족하지 못했습니다.';
   }
   el('final-result-delta').textContent = delta == null
     ? '—' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%p`;
@@ -333,7 +357,57 @@ function renderFinalResult(study, cveId) {
     ? '완료된 결과가 없습니다.'
     : !currentStudy ? '현재 연구 질문에서 제외한 과거 기록입니다.'
       : positive ? 'Agent의 target 탐색 개선을 확인했습니다.'
-        : 'Agent의 target 탐색 우위를 확정할 수 없습니다.';
+        : Number.isFinite(delta) && delta < 0
+          ? 'Stock 방향의 CVE별 효과이며 Agent 우위가 아닙니다.'
+          : 'Agent의 target 탐색 우위를 확정할 수 없습니다.';
+}
+
+function renderResearchOverview(research) {
+  const studies = research?.studies || [];
+  const target = research?.minimum_cross_cve_scope;
+  el('research-scope').textContent = `${studies.length} / ${Number.isFinite(target) ? target : '—'}`;
+  const rq1Positive = studies.filter(row => row.effects?.agent_vs_stock?.a12 > .5).length;
+  el('research-rq1').textContent = `${rq1Positive} / ${studies.length}`;
+  const rq2Both = studies.filter(row => ['agent_vs_one_shot', 'agent_vs_heuristic'].every(key => {
+    const effect = row.effects?.[key] || {};
+    return effect.delta_percentage_points > 0 && effect.p_value < .05;
+  })).length;
+  el('research-rq2').textContent = `${rq2Both} / ${studies.length}`;
+  el('research-caveat').textContent = studies.length
+    ? `RQ1의 ${rq1Positive}/${studies.length}은 A12 > 0.5인 방향 집계입니다. RQ2에서 Agent가 두 대안 모두를 넘는 CVE는 ${rq2Both}건입니다. CVE 간 일반화는 최소 ${target || 30}건의 채택 결과 전까지 판단하지 않으며, target 도달은 취약점 재발견이 아닙니다.`
+    : '현재 연구 감사에서 채택한 Guided Localization CVE가 없습니다. 탐색적 결과를 채택 결과로 자동 승격하지 않습니다.';
+
+  const deltas = studies.map(row => row.effects?.agent_vs_stock?.delta_percentage_points)
+    .filter(Number.isFinite);
+  const extent = Math.max(1, ...deltas.map(Math.abs));
+  el('research-rq1-chart').innerHTML = studies.map(row => {
+    const value = row.effects?.agent_vs_stock?.delta_percentage_points;
+    if (!Number.isFinite(value)) return '';
+    const width = Math.min(50, Math.abs(value) / extent * 48);
+    const left = value < 0 ? 50 - width : 50;
+    return `<button type="button" class="delta-row" data-cve="${row.cve_id}" aria-label="${row.cve_id}, Agent 대 Stock AUC 차이 ${value.toFixed(2)} 퍼센트포인트, 상세 보기">
+      <b>${row.cve_id.replace('CVE-', '')}</b><span class="delta-track"><i class="delta-zero"></i><i class="delta-bar ${value < 0 ? 'negative' : 'positive'}" style="left:${left}%;width:${width}%"></i></span>
+      <strong class="${value < 0 ? 'negative' : 'positive'}">${value >= 0 ? '+' : ''}${value.toFixed(2)}%p</strong>
+    </button>`;
+  }).join('') || '<p class="caption">비교 가능한 채택 결과가 없습니다.</p>';
+
+  el('research-rq2-chart').innerHTML = studies.length
+    ? `<div class="rq2-head"><span>CVE</span><span>Agent / One-shot</span><span>Agent / Heuristic</span></div>${studies.map(row => {
+      const cell = key => {
+        const effect = row.effects?.[key] || {};
+        const value = effect.a12;
+        const direction = value > .5 ? 'positive' : value < .5 ? 'negative' : 'neutral';
+        return `<span class="rq2-cell ${direction}" title="A12 ${Number.isFinite(value) ? value.toFixed(2) : '미측정'} · paired p ${Number.isFinite(effect.p_value) ? effect.p_value.toFixed(4) : '미측정'}">${Number.isFinite(value) ? value.toFixed(2) : '—'}</span>`;
+      };
+      return `<button type="button" class="rq2-row" data-cve="${row.cve_id}" aria-label="${row.cve_id} RQ2 비교, 상세 보기"><b>${row.cve_id.replace('CVE-', '')}</b>${cell('agent_vs_one_shot')}${cell('agent_vs_heuristic')}</button>`;
+    }).join('')}`
+    : '<p class="caption">비교 가능한 채택 결과가 없습니다.</p>';
+  document.querySelectorAll('.research-overview [data-cve]').forEach(button => {
+    button.addEventListener('click', () => selectExperiment(button.dataset.cve));
+  });
+  const auditDate = research?.audit_generated_at
+    ? new Date(research.audit_generated_at).toLocaleString('ko-KR') : '미확인';
+  el('research-source').textContent = `출처: ${research?.source || '연구 감사 미등록'} · 감사 시점 ${auditDate} · A12와 차이는 CVE별 기술 통계이며 통합 효과 추정이 아닙니다. 금전 비용은 가격 계약 부재로 미산출.`;
 }
 
 function renderAgentStudy(cve) {
@@ -349,16 +423,51 @@ function renderAgentStudy(cve) {
   const currentStudy = study.study_level === 'guided_localization';
   const modelPinned = study.design?.llm_model && study.design.llm_model !== 'default';
   const efficacyReady = Number.isFinite(trials) && trials >= 10 && evidenceReady && modelPinned;
+  const admissionDetail = !modelPinned && currentStudy
+    ? '모델 버전이 고정되지 않아 RQ1·RQ2의 탐색적 비교로만 표시합니다.'
+    : (study.admissibility_blockers || ['admission contract incomplete']).join(' · ');
   const targetWinners = winnersFor(Object.fromEntries(Object.keys(armMeta).map(arm => [arm, arms?.[arm]?.target_coverage_auc])));
   const edgeWinners = winnersFor(Object.fromEntries(Object.keys(armMeta).map(arm => [arm, arms?.[arm]?.edge_coverage])));
   const targetNames = targetWinners.map(arm => armMeta[arm].label).join(' + ') || '측정 불가';
   const edgeNames = edgeWinners.map(arm => armMeta[arm].label).join(' + ') || '측정 불가';
+  const comparisonGroups = [
+    ['RQ1 · LLM guidance vs Stock', [
+      ['One-shot vs Stock', 'one_shot_vs_stock'],
+      ['Agent vs Stock', 'agent_vs_stock'],
+    ]],
+    ['RQ2 · iterative feedback', [
+      ['Agent vs One-shot', 'agent_vs_one_shot'],
+      ['Agent vs Heuristic', 'agent_vs_heuristic'],
+    ]],
+  ];
+  const comparisonHtml = currentStudy ? `<div class="rq-comparison-grid">${comparisonGroups.map(([title, rows]) =>
+    `<div class="rq-comparison"><h4>${title}</h4>${rows.map(([label, key]) => {
+      const metric = study.comparisons?.[key]?.metrics?.target_coverage_auc || {};
+      const left = Number.isFinite(metric.guided_median) ? metric.guided_median.toFixed(4) : '—';
+      const right = Number.isFinite(metric.baseline_median) ? metric.baseline_median.toFixed(4) : '—';
+      const effect = Number.isFinite(metric.a12) ? metric.a12.toFixed(2) : '—';
+      const p = Number.isFinite(metric.p_value) ? metric.p_value.toFixed(4) : '—';
+      return `<p><b>${label}</b><span>AUC ${left} / ${right} · A12 ${effect} · p ${p}</span></p>`;
+    }).join('')}</div>`).join('')}</div>` : '';
+  const targetFunctionCount = Array.isArray(study.evaluation_target?.functions)
+    ? study.evaluation_target.functions.length : 0;
+  const targetEdgeCount = study.evaluation_target?.edge_count;
+  const targetScopeHtml = currentStudy && targetFunctionCount
+    ? `<p class="caption">실제 평가 target map: ${targetFunctionCount}개 심볼 · ${Number.isFinite(targetEdgeCount) ? targetEdgeCount : '—'} edges.${cve === 'CVE-2025-12433' ? ' 사전 선택 기록의 대표 함수보다 넓은 범위이며 VisitSwitchStatement 단독 효과가 아닙니다.' : targetFunctionCount > 1 ? ' 단일 함수의 효과로 해석하지 마세요.' : ''}</p>`
+    : '';
+  const usage = study.llm_usage || {};
+  const usageHtml = currentStudy
+    ? `<p class="caption">보조 RQ3 사용량: provider ${Number.isFinite(usage.provider_calls) ? fmt(usage.provider_calls) : '—'}회 · 입력 ${Number.isFinite(usage.input_tokens) ? fmt(usage.input_tokens) : '—'} tokens · 출력 ${Number.isFinite(usage.output_tokens) ? fmt(usage.output_tokens) : '—'} tokens · provider 지연 ${Number.isFinite(usage.provider_latency_seconds) ? fmt(usage.provider_latency_seconds) : '—'}초 · 금전 비용 ${Number.isFinite(usage.cost_usd) ? `$${usage.cost_usd.toFixed(4)}` : '가격 계약 부재로 미산출'}</p>`
+    : '';
   el('agent-study-pill').textContent = `${trials ?? '—'} TRIALS / ARM · ${!currentStudy ? 'ARCHIVED' : efficacyReady ? 'EFFICACY' : 'EXPLORATORY'}`;
   el('agent-study').innerHTML = `<div class="study-summary">
       <div><small>TARGET SEARCH LEADER</small><b>${targetNames}</b></div>
       <div><small>SEARCH BREADTH LEADER</small><b>${edgeNames}</b></div>
-      <div class="confidence ${efficacyReady ? 'ready' : 'smoke'}"><small>EVIDENCE LEVEL</small><b>${!currentStudy ? '과거 재현 실험' : efficacyReady ? 'CVE별 RQ1·RQ2 비교 가능' : '탐색적 결과'}</b><p>${efficacyReady ? `독립 target·paired RNG·모델 고정 기준을 충족했습니다. 보조 RQ3의 금전 비용은 ${study.monetary_cost_available ? '기록됨' : '미산출'}입니다.` : (study.admissibility_blockers || ['admission contract incomplete']).join(' · ')}</p></div>
+      <div class="confidence ${efficacyReady ? 'ready' : 'smoke'}"><small>EVIDENCE LEVEL</small><b>${!currentStudy ? '과거 재현 실험' : efficacyReady ? 'CVE별 RQ1·RQ2 비교 가능' : '탐색적 결과'}</b><p>${efficacyReady ? `독립 target·paired RNG·모델 고정 기준을 충족했습니다. 보조 RQ3의 금전 비용은 ${study.monetary_cost_available ? '기록됨' : '미산출'}입니다.` : admissionDetail}</p></div>
     </div>
+    ${comparisonHtml}
+    ${targetScopeHtml}
+    ${usageHtml}
     <div class="study-chart-grid">${studyMetrics.map(metric => renderStudyMetric(metric, arms, study)).join('')}</div>`;
 }
 
@@ -613,6 +722,7 @@ fetch('data/results.json', {cache: 'no-store'}).then(r => r.json()).then(data =>
     });
   });
   allExperiments = experiments;
+  renderResearchOverview(data.research);
   renderYearFilter();
   renderCveTabs();
   if (experiments.length) render(experiments.at(-1));
