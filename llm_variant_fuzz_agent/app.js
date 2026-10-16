@@ -373,8 +373,18 @@ function renderResearchOverview(research) {
     return effect.delta_percentage_points > 0 && effect.p_value < .05;
   })).length;
   el('research-rq2').textContent = `${rq2Both} / ${studies.length}`;
+  const admission = research?.admission || {};
+  const feasibility = Number.isFinite(admission.planned)
+    ? ` 별도 rotation queue(${admission.queue_id || '미지정'})는 등록 ${admission.planned}건 중 채택 ${admission.performance_admitted || 0}건, 차단 ${admission.counts?.blocked || 0}건, 보류 ${admission.counts?.held || 0}건입니다. 차단·보류는 성능 0으로 계산하지 않습니다.`
+    : '';
+  const decisions = studies.reduce((sum, row) => sum + (row.adaptation?.decision_count || 0), 0);
+  const continues = studies.reduce((sum, row) => sum + (row.adaptation?.actions?.continue || 0), 0);
+  const acceptedSeeds = studies.reduce((sum, row) => sum + (row.adaptation?.accepted_new_seed_count || 0), 0);
+  const adaptation = decisions
+    ? ` Agent 결정 ${decisions}회 중 continue ${continues}회, 채택 새 seed ${acceptedSeeds}개입니다. 이는 적응 동작의 진단값이며 finding이 아닙니다.`
+    : '';
   el('research-caveat').textContent = studies.length
-    ? `RQ1의 ${rq1Positive}/${studies.length}은 A12 > 0.5인 방향 집계입니다. RQ2에서 Agent가 두 대안 모두를 넘는 CVE는 ${rq2Both}건입니다. CVE 간 일반화는 최소 ${target || 30}건의 채택 결과 전까지 판단하지 않으며, target 도달은 취약점 재발견이 아닙니다.`
+    ? `RQ1의 ${rq1Positive}/${studies.length}은 A12 > 0.5인 방향 집계입니다. RQ2에서 Agent가 두 대안 모두를 넘는 CVE는 ${rq2Both}건입니다.${adaptation}${feasibility} CVE 간 일반화는 최소 ${target || 30}건의 채택 결과 전까지 판단하지 않으며, target 도달은 취약점 재발견이 아닙니다.`
     : '현재 연구 감사에서 채택한 Guided Localization CVE가 없습니다. 탐색적 결과를 채택 결과로 자동 승격하지 않습니다.';
 
   const deltas = studies.map(row => row.effects?.agent_vs_stock?.delta_percentage_points)
