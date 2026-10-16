@@ -364,8 +364,7 @@ function renderFinalResult(study, cveId) {
 
 function renderResearchOverview(research) {
   const studies = research?.studies || [];
-  const target = research?.minimum_cross_cve_scope;
-  el('research-scope').textContent = `${studies.length} / ${Number.isFinite(target) ? target : '—'}`;
+  el('research-scope').textContent = String(studies.length);
   const rq1Positive = studies.filter(row => row.effects?.agent_vs_stock?.a12 > .5).length;
   el('research-rq1').textContent = `${rq1Positive} / ${studies.length}`;
   const rq2Both = studies.filter(row => ['agent_vs_one_shot', 'agent_vs_heuristic'].every(key => {
@@ -384,7 +383,7 @@ function renderResearchOverview(research) {
     ? ` Agent 결정 ${decisions}회 중 continue ${continues}회, 채택 새 seed ${acceptedSeeds}개입니다. 이는 적응 동작의 진단값이며 finding이 아닙니다.`
     : '';
   el('research-caveat').textContent = studies.length
-    ? `RQ1의 ${rq1Positive}/${studies.length}은 A12 > 0.5인 방향 집계입니다. RQ2에서 Agent가 두 대안 모두를 넘는 CVE는 ${rq2Both}건입니다.${adaptation}${feasibility} CVE 간 일반화는 최소 ${target || 30}건의 채택 결과 전까지 판단하지 않으며, target 도달은 취약점 재발견이 아닙니다.`
+    ? `RQ1의 ${rq1Positive}/${studies.length}은 A12 > 0.5인 방향 집계입니다. RQ2에서 Agent가 두 대안 모두를 넘는 CVE는 ${rq2Both}건입니다.${adaptation}${feasibility} CVE 간 일반화는 고정된 예약 수가 아니라 실제로 채택된 CVE의 수·다양성·이질성·불확실성을 함께 보고 판단합니다. target 도달은 취약점 재발견이 아닙니다.`
     : '현재 연구 감사에서 채택한 Guided Localization CVE가 없습니다. 탐색적 결과를 채택 결과로 자동 승격하지 않습니다.';
 
   const deltas = studies.map(row => row.effects?.agent_vs_stock?.delta_percentage_points)
