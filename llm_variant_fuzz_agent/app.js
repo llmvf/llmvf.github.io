@@ -352,7 +352,7 @@ function renderFinalResult(study, cveId) {
   el('result-scale').textContent = Number.isFinite(trials)
     ? `${armCount || 4} arms × ${trials} trials = ${(armCount || 4) * trials} runs` : '실험 규모 정보 없음';
   el('result-quality').textContent = study
-    ? `${study.result_quality_gate?.status || 'unknown'} · ${!currentStudy ? 'archived' : study.research_admissible ? 'research admissible' : 'exploratory'}` : 'NO RESULT';
+    ? `${study.result_quality_gate?.status || 'unknown'} · ${!currentStudy ? 'archived' : study.research_admissible ? 'within-CVE quality admitted' : 'exploratory'}` : 'NO RESULT';
   el('result-interpretation').textContent = !study
     ? '완료된 결과가 없습니다.'
     : !currentStudy ? '현재 연구 질문에서 제외한 과거 기록입니다.'
@@ -468,7 +468,7 @@ function renderAgentStudy(cve) {
   const usageHtml = currentStudy
     ? `<p class="caption">보조 RQ3 사용량: provider ${Number.isFinite(usage.provider_calls) ? fmt(usage.provider_calls) : '—'}회 · 입력 ${Number.isFinite(usage.input_tokens) ? fmt(usage.input_tokens) : '—'} tokens · 출력 ${Number.isFinite(usage.output_tokens) ? fmt(usage.output_tokens) : '—'} tokens · provider 지연 ${Number.isFinite(usage.provider_latency_seconds) ? fmt(usage.provider_latency_seconds) : '—'}초 · 금전 비용 ${Number.isFinite(usage.cost_usd) ? `$${usage.cost_usd.toFixed(4)}` : '가격 계약 부재로 미산출'}</p>`
     : '';
-  el('agent-study-pill').textContent = `${trials ?? '—'} TRIALS / ARM · ${!currentStudy ? 'ARCHIVED' : efficacyReady ? 'EFFICACY' : 'EXPLORATORY'}`;
+  el('agent-study-pill').textContent = `${trials ?? '—'} TRIALS / ARM · ${!currentStudy ? 'ARCHIVED' : efficacyReady ? 'WITHIN-CVE QUALITY' : 'EXPLORATORY'}`;
   el('agent-study').innerHTML = `<div class="study-summary">
       <div><small>TARGET SEARCH LEADER</small><b>${targetNames}</b></div>
       <div><small>SEARCH BREADTH LEADER</small><b>${edgeNames}</b></div>
@@ -488,6 +488,8 @@ function latestDiscovery(cveId, experimentType = null) {
 }
 
 function renderDiscoveryEvaluation(cveId) {
+  const rediscoveryRuns = discoveryStudies.filter(row => !row.fixture && row.cve_id === cveId && row.experiment_type === 'poc_free_rediscovery');
+  const variantRuns = discoveryStudies.filter(row => !row.fixture && row.cve_id === cveId && row.experiment_type === 'variant_discovery');
   const rediscovery = latestDiscovery(cveId, 'poc_free_rediscovery');
   const variant = latestDiscovery(cveId, 'variant_discovery');
   const active = rediscovery || variant;
@@ -497,10 +499,10 @@ function renderDiscoveryEvaluation(cveId) {
     ? `Target AUC 판정: ${guided.statistical_decision?.level || '미판정'} · 실제 finding ${guidedFinding ? '있음' : '없음'}`
     : '현재 연구 질문에 맞는 guided-localization 결과가 없습니다.';
   el('rediscovery-lane-summary').textContent = rediscovery
-    ? `품질 gate ${rediscovery.quality_gate?.status || 'unknown'} · confirmed known-CVE ${rediscovery.coverage_finding_separation?.confirmed_known_cve_count || 0}`
+    ? `${rediscoveryRuns.length}개 실행 보존 · 최신 품질 gate ${rediscovery.quality_gate?.status || 'unknown'} · confirmed known-CVE ${rediscovery.coverage_finding_separation?.confirmed_known_cve_count || 0}`
     : 'PoC-free rediscovery 결과가 없습니다.';
   el('variant-lane-summary').textContent = variant
-    ? `과거 호환 결과 · confirmed variant ${variant.coverage_finding_separation?.confirmed_variant_count || 0}`
+    ? `${variantRuns.length}개 실행 보존 · 최신 confirmed variant ${variant.coverage_finding_separation?.confirmed_variant_count || 0}`
     : '과거 Variant-discovery 결과가 없습니다.';
 
   if (!active) {
@@ -526,11 +528,12 @@ function renderDiscoveryEvaluation(cveId) {
       : '유효한 arm 비교값이 없습니다.';
     const agent = arms.agent_loop || {};
     const funnel = agent.trigger_stage_reach_rate || {};
-    el('trigger-funnel').innerHTML = [1,2,3,4,5].map(stage => {
+    const stages = Object.keys(funnel).map(Number).filter(Number.isInteger).sort((a,b) => a-b);
+    el('trigger-funnel').innerHTML = stages.map(stage => {
       const rate = Number(funnel[String(stage)] || 0);
       return `<div class="funnel-row"><b>STAGE ${stage}</b><i style="width:${rate * 100}%"></i><small>${fmt(rate * 100)}%</small></div>`;
     }).join('');
-    const reachedStages = [1,2,3,4,5].filter(stage => Number(funnel[String(stage)] || 0) > 0);
+    const reachedStages = stages.filter(stage => Number(funnel[String(stage)] || 0) > 0);
     const deepest = reachedStages.length ? Math.max(...reachedStages) : 0;
     el('trigger-insight').textContent = deepest
       ? `Agent arm은 최대 trigger stage ${deepest}까지 도달했습니다. 뒤 단계로 갈수록 비율이 줄면 trigger 조건 조합이 병목입니다.`
@@ -646,7 +649,12 @@ function render(exp) {
   el('poc-dot').className = `status-dot ${pocView[1]}`;
   el('poc-detail').textContent = `${poc.detail}${poc.oracle ? ` · oracle: ${poc.oracle}` : ''}`;
 
-  const rediscovery = {status: 'not_evaluated', detail: 'experimental lane is hidden from the default view'};
+  const discoveryResult = latestDiscovery(exp.cve_id, 'poc_free_rediscovery');
+  const rediscoveryCount = discoveryResult?.coverage_finding_separation?.confirmed_known_cve_count || 0;
+  const rediscovery = discoveryResult
+    ? {status: discoveryResult.quality_gate?.status !== 'pass' ? 'not_evaluated' : rediscoveryCount > 0 ? 'rediscovered' : 'not_rediscovered',
+       detail: `${discoveryStudies.filter(row => !row.fixture && row.cve_id === exp.cve_id && row.experiment_type === 'poc_free_rediscovery').length}개 별도 실행 보존 · 최신 품질 gate ${discoveryResult.quality_gate?.status || 'unknown'} · finding ${rediscoveryCount}개`}
+    : {status: 'not_evaluated', detail: 'PoC-free discovery 결과가 없습니다.'};
   const rediscoveryView = {
     rediscovered: ['REDISCOVERED', 'pass'],
     not_rediscovered: ['NOT REDISCOVERED', 'warn'],
@@ -703,14 +711,14 @@ function render(exp) {
   el('verdict').textContent = study && study.study_level !== 'guided_localization'
     ? 'ARCHIVED · OUTSIDE CURRENT RESEARCH QUESTION'
     : enough && paired && targetReady && evidenceAdmissible && explicitModel
-      ? 'EFFICACY-READY' : 'EXPLORATORY · NOT A CONFIRMATORY EFFICACY CLAIM';
+      ? 'WITHIN-CVE QUALITY ADMITTED · NOT HELD-OUT CONFIRMATION' : 'EXPLORATORY · NOT A CONFIRMATORY EFFICACY CLAIM';
   renderAgentStudy(exp.cve_id);
 }
 
 fetch('data/results.json', {cache: 'no-store'}).then(r => r.json()).then(data => {
   agentStudies = data.agent_studies || [];
   campaigns = data.campaigns || [];
-  discoveryStudies = data.discovery_studies || [];
+  discoveryStudies = data.discovery_studies || data.archived_experimental_discovery || [];
   const guidedStudies = agentStudies.filter(item => item.study_level === 'guided_localization');
   const admittedStudies = guidedStudies.filter(item => item.research_admissible === true);
   el('evidence-overview').textContent = `Guided localization ${guidedStudies.length}건 완료 · CVE별 RQ1·RQ2 입장 ${admittedStudies.length}건`;

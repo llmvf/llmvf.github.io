@@ -170,19 +170,19 @@
           <h3>동일 예산에서 target을 더 잘 탐색하는가?</h3>
           <p id="guided-lane-summary">Target-coverage AUC를 primary endpoint로 판정하며 target 도달이나 crash를 실제 finding으로 해석하지 않습니다.</p>
         </article>
-        <article class="lane-card rediscovery" id="rediscovery-lane" hidden>
+        <article class="lane-card rediscovery" id="rediscovery-lane">
           <small>PoC-FREE REDISCOVERY</small>
           <h3>PoC 없이 CVE를 다시 찾는가?</h3>
           <p id="rediscovery-lane-summary">등록된 3-build oracle을 통과한 finding만 재발견으로 계산합니다.</p>
         </article>
-        <article class="lane-card variant" id="variant-lane" hidden>
+        <article class="lane-card variant" id="variant-lane">
           <small>VARIANT DISCOVERY</small>
           <h3>Current-upstream variant가 있는가?</h3>
           <p id="variant-lane-summary">최소화·중복 제거·root-cause 확인 전에는 후보 상태를 유지합니다.</p>
         </article>
       </section>
 
-      <section class="discovery-grid" id="discovery-evaluation" hidden>
+      <section class="discovery-grid" id="discovery-evaluation">
         <article class="panel wide">
           <div class="panel-title"><span>DISCOVERY ARM COMPARISON</span><span id="discovery-quality-pill" class="pill">NO DATA</span></div>
           <div id="discovery-arm-comparison" class="discovery-bars"></div>
