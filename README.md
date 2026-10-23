@@ -1,19 +1,16 @@
-# llmvf.github.io
+# V8 Fuzz Lab public site
 
-Public website for the LLMVF research organization.
+Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current `llmvf/v8-fuzz-lab` research and replaces the previous LLM variant fuzzing dashboard.
 
-## Live website
+## Content baseline
 
-**https://llmvf.github.io/**
+- Lab revision: `cac645968cc17fe7f7fe9d0befa161402407be8f` (2026-10-23)
+- Core sources: lab `README.md`, `architecture/workflow.md`, `architecture/integration.md`, `experiments/protocol.md`, and the named files in `experiments/results/`.
+- Experiment totals are kept per campaign. A historical replay, generator smoke, target hit, or coverage observation must not be presented as a new vulnerability finding.
+- The lab repository and raw artifacts may be private. This site publishes curated summaries only.
 
-- [Home](https://llmvf.github.io/)
-- [Architecture](https://llmvf.github.io/architecture.html)
-- [성과 요약](https://llmvf.github.io/performance.html)
-- [Report](https://llmvf.github.io/reports.html)
+## Updating
 
-The site is intentionally dependency-free: edit the HTML, CSS, or JavaScript and
-push to `main`. GitHub Pages publishes the result from the repository root.
+Edit `build_site.py` and `site_styles_new.css`, then run `py -3 build_site.py`. Commit the generated HTML, CSS, JavaScript, and favicon with the source changes. GitHub Pages serves the repository root without a build dependency.
 
-Public experiment summaries are read from `data/metrics.json` and report links
-from `data/reports.json`. Keep raw or sensitive experiment output in the private
-research repository and publish only reviewed summary data here.
+The old `/llm_variant_fuzz_agent/` route redirects to the new results page for existing links.

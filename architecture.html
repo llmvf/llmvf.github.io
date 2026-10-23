@@ -1,53 +1,32 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="LLMVF의 Supervisor, discovery layer, 네 실험군과 후보 검증 구조를 설명합니다." /><meta name="theme-color" content="#07110f" />
-    <title>Architecture — LLMVF</title><link rel="icon" href="favicon.svg" type="image/svg+xml" /><link rel="stylesheet" href="styles.css" /><script src="script.js" defer></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">본문으로 바로가기</a><div class="noise" aria-hidden="true"></div>
-    <header class="site-header scrolled" data-header><a class="brand" href="index.html" aria-label="LLMVF 홈"><span class="brand-mark" aria-hidden="true">L/</span><span>LLMVF</span></a><div class="header-actions"><nav aria-label="주요 메뉴"><a href="index.html">Home</a><a class="active" href="architecture.html">Architecture</a><a href="performance.html">성과 요약</a><a href="reports.html">Report</a><a href="llm_variant_fuzz_agent/">Experiment Results</a></nav><a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a><button class="theme-toggle" type="button" aria-label="낮 모드로 전환" title="낮/밤 모드 전환"><span aria-hidden="true">◐</span></button></div></header>
-    <main id="main" class="subpage architecture-page">
-      <section class="page-hero reveal"><div><p class="section-index">SYSTEM ARCHITECTURE</p><h1>Supervisor가<br />실험을 지킵니다.</h1></div><p>LLM의 제안과 실제 성능 판정을 분리합니다. 모든 실행은 고정된 dataset, runtime contract, evidence gate와 checkpoint를 통과하며 coverage와 finding은 별도 endpoint로 결론 냅니다.</p></section>
-      <section class="section agent-map-section">
-        <div class="section-heading reveal"><p class="section-index">AGENT MAP</p><h2>하나의 Supervisor,<br /><span>네 개의 역할 계층</span></h2><p>각 Agent는 독립된 입력·출력 artifact와 gate를 가지며, Supervisor가 실행 순서와 실패 복구를 통제합니다.</p></div>
-        <div class="agent-map reveal">
-          <div class="supervisor-hub"><span>CONTROL PLANE</span><h3>Campaign Supervisor</h3><p>manifest · checkpoint · event log · policy lock</p></div>
-          <div class="agent-rail" aria-hidden="true"><i></i></div>
-          <div class="agent-layer"><div class="layer-label"><span>01</span><b>Evidence</b></div><article><h3>Dataset Registry Gate</h3><p>split·strata·held-out lock</p></article><article><h3>Evidence Leakage Guard</h3><p>corpus·prompt provenance</p></article><article><h3>Trigger Model Agent</h3><p>predicate·distance·stage</p></article></div>
-          <div class="agent-layer"><div class="layer-label"><span>02</span><b>Runtime</b></div><article><h3>Toolchain Compatibility</h3><p>V8·Fuzzilli revision</p></article><article><h3>Runtime Integrity Validator</h3><p>CPU·startup·budget</p></article><article><h3>Failure & Recovery</h3><p>diagnose·quarantine·resume</p></article></div>
-          <div class="agent-layer"><div class="layer-label"><span>03</span><b>Discovery</b></div><article><h3>Reach-to-Exploit</h3><p>coverage → invariant</p></article><article><h3>Semantic Oracle</h3><p>crash·sanitizer·mismatch</p></article><article><h3>Candidate Validation</h3><p>reproduce·minimize·3-build</p></article></div>
-          <div class="agent-layer"><div class="layer-label"><span>04</span><b>Decision</b></div><article><h3>Crash/Semantic Triage</h3><p>dedup·root-cause</p></article><article><h3>Result Quality Gate</h3><p>validity·power·admission</p></article><article><h3>Statistical Decision</h3><p>paired test·effect·dashboard</p></article></div>
-        </div>
-      </section>
-      <section class="flow-section reveal" aria-labelledby="flow-title">
-        <div class="flow-title-row"><div><p class="section-index">CONTROL PLANE</p><h2 id="flow-title">실험이 통과하는 경로</h2></div><p>기존 Campaign Supervisor의 무결성·복구 기능 위에 discovery 전용 trigger, oracle, candidate validation 계층을 추가합니다.</p></div>
-        <div class="system-flow">
-          <div class="flow-coordinate"><span>EVIDENCE</span><span>SUPERVISION</span><span>EXECUTION</span></div>
-          <div class="flow-primary"><article class="flow-stage evidence-stage"><span class="stage-id">01 / LOCK</span><h3>Dataset & Evidence Gate</h3><div class="evidence-chips"><i>SPLIT</i><i>HASH</i><i>POLICY</i><i>PROVENANCE</i></div><p>held-out 정책과 leakage를 실행 전에 고정</p></article><span class="flow-connector" aria-hidden="true"><i></i></span><article class="flow-stage analysis-stage"><span class="stage-id">02 / MODEL</span><h3>Trigger & Control</h3><ul><li>Trigger Model Agent</li><li>Reach-to-Exploit Controller</li><li>Semantic feedback</li></ul><p>coverage에서 invariant 완성으로 탐색 목표 전환</p></article><span class="flow-connector" aria-hidden="true"><i></i></span><article class="flow-stage directive-stage"><span class="stage-id">03 / RUN</span><h3>Runtime Supervisor</h3><ul><li>Toolchain Compatibility</li><li>Runtime Integrity</li><li>Failure Diagnosis + Recovery</li></ul><p>invalid epoch 격리 후 checkpoint에서 재개</p></article></div>
-          <div class="flow-fork" aria-hidden="true"><span>PAIRED SEEDS · EQUAL BUDGET · RANDOMIZED ORDER</span><i></i></div>
-          <div class="experiment-lanes four-lanes"><article class="lane baseline-lane"><span>ARM / 01</span><h3>Stock</h3><p>guidance 없는 Fuzzilli 기준선</p><strong>CONTROL</strong></article><article class="lane"><span>ARM / 02</span><h3>One-shot LLM</h3><p>검증된 초기 LLM seed만 사용</p><strong>INITIAL KNOWLEDGE</strong></article><article class="lane"><span>ARM / 03</span><h3>Heuristic Loop</h3><p>규칙 기반 feedback 적응</p><strong>CLOSED LOOP</strong></article><article class="lane guided-lane"><span>ARM / 04</span><h3>Agent Loop</h3><p>LLM이 다음 action을 선택</p><strong>AGENT POLICY</strong></article></div>
-          <div class="flow-merge" aria-hidden="true"><i></i><span>SEPARATED ENDPOINTS</span></div>
-          <div class="evaluation-stage architecture-evaluation"><div><span class="stage-id">04 / DECISION</span><h3>Quality & Statistics</h3></div><ul><li><strong>LOC</strong><span>target AUC</span></li><li><strong>TRG</strong><span>trigger stage</span></li><li><strong>RED</strong><span>rediscovery</span></li><li><strong>VAR</strong><span>variants</span></li><li><strong>FP</strong><span>false positive</span></li><li><strong>$</strong><span>finding cost</span></li></ul><a href="llm_variant_fuzz_agent/">결과 보기 ↗</a></div>
-        </div>
-      </section>
-      <section class="section validation-section"><div class="section-heading reveal"><p class="section-index">DISCOVERY DATA PLANE</p><h2>후보는 바로 발견이<br /><span>되지 않습니다.</span></h2><p>fuzzing과 격리된 queue에서 재현·최소화·triage·3-way confirmation을 순서대로 수행합니다.</p></div><div class="validation-flow reveal"><article><span>01</span><h3>Candidate Queue</h3><p>유망 testcase를 deduplicate하고 별도 CPU slot으로 전달</p></article><i>→</i><article><span>02</span><h3>Reproducer</h3><p>nondeterminism과 timeout을 반복 실행으로 분리</p></article><i>→</i><article><span>03</span><h3>Minimizer + Triage</h3><p>crash, sanitizer, mismatch, miscompilation 신호를 정규화</p></article><i>→</i><article><span>04</span><h3>3-build Confirmation</h3><p>vulnerable · fixed · current-upstream 동작을 비교</p></article></div></section>
-      <section class="section track-contracts"><div class="section-heading reveal"><p class="section-index">THREE RESULT PLANES</p><h2>하나의 숫자로<br /><span>섞지 않습니다.</span></h2><p>각 실험 유형은 사전 고정된 primary endpoint와 허용 evidence 수준을 갖습니다.</p></div><div class="track-grid"><article class="track-card reveal"><span>GUIDED</span><h3>Localization</h3><p>target coverage와 AUC를 판정하며 실제 finding 여부는 별도 표시합니다.</p><strong>KNOWN EVIDENCE ALLOWED</strong></article><article class="track-card reveal"><span>REDISCOVERY</span><h3>PoC-free</h3><p>PoC·crash seed 유입 시 trial을 invalid 처리하고 원인을 남깁니다.</p><strong>LEAKAGE GUARDED</strong></article><article class="track-card reveal"><span>DISCOVERY</span><h3>Current-upstream</h3><p>현재 빌드 재현만으로 variant를 확정하지 않고 원인 분석까지 요구합니다.</p><strong>STAGED CONFIRMATION</strong></article></div></section>
-      <section class="section hypothesis-section">
-        <div class="section-heading reveal"><p class="section-index">RESEARCH HYPOTHESES</p><h2>무엇을 비교하고,<br /><span>어디까지 주장하는가</span></h2><p>각 질문은 고정된 arm 비교와 endpoint를 가지며, coverage 향상을 discovery 성능으로 확대 해석하지 않습니다.</p></div>
-        <div class="hypothesis-grid">
-          <article class="reveal"><span>RQ1</span><h3>초기 LLM 지식</h3><p>One-shot은 Stock보다 취약 코드에 더 빠르고 자주 도달하는가?</p><strong>ONE-SHOT vs STOCK</strong></article>
-          <article class="reveal"><span>RQ2</span><h3>반복 feedback</h3><p>Heuristic loop는 정적 One-shot보다 coverage feedback을 더 효과적으로 활용하는가?</p><strong>HEURISTIC vs ONE-SHOT</strong></article>
-          <article class="reveal"><span>RQ3</span><h3>Agent 정책</h3><p>LLM의 다음-action 결정이 단순 규칙 기반 loop보다 추가 이득을 주는가?</p><strong>AGENT vs HEURISTIC</strong></article>
-          <article class="reveal"><span>RQ4</span><h3>Discovery 일반화</h3><p>guided localization의 이득이 PoC-free rediscovery와 variant discovery로 이어지는가?</p><strong>LOCALIZATION ≠ DISCOVERY</strong></article>
-          <article class="reveal"><span>RQ5</span><h3>Coverage–Finding 관계</h3><p>전체 edge와 target AUC 증가는 실제 candidate·finding 증가와 연결되는가?</p><strong>COVERAGE vs FINDING</strong></article>
-          <article class="reveal"><span>RQ6</span><h3>비용 효율</h3><p>관측된 효과가 LLM token, latency와 candidate validation 비용을 감안해도 실용적인가?</p><strong>EFFECT vs COST</strong></article>
-          <article class="reveal"><span>RQ7</span><h3>재현성</h3><p>revision, prompt, seed, CPU와 환경을 고정했을 때 arm 차이가 반복되는가?</p><strong>PAIRED REPLICATION</strong></article>
-        </div>
-      </section>
-      <section class="section contracts-section"><div class="section-heading reveal"><p class="section-index">SYSTEM CONTRACTS</p><h2>연결보다 중요한<br /><span>경계의 규칙</span></h2><p>성공뿐 아니라 실패, 누락, underpowered 상태도 동일한 schema로 전달합니다.</p></div><div class="contract-grid"><article class="reveal"><span>01</span><h3>Evidence Contract</h3><p>파일 hash, corpus provenance, prompt provenance와 허용 정보 정책을 보존합니다.</p></article><article class="reveal"><span>02</span><h3>Runtime Contract</h3><p>CPU 격리, startup self-test, toolchain과 wall-time을 검증합니다.</p></article><article class="reveal"><span>03</span><h3>Recovery Contract</h3><p>기술적 invalid만 quarantine하고 마지막 유효 checkpoint부터 재개합니다.</p></article><article class="reveal"><span>04</span><h3>Decision Contract</h3><p>coverage, trigger, rediscovery, variant 결론을 분리하고 다중검정을 보정합니다.</p></article></div></section>
-    </main>
-    <footer><a class="brand" href="index.html"><span class="brand-mark">L/</span><span>LLMVF</span></a><p>Supervisor-governed V8 fuzzing</p><p>© <span data-year></span> LLMVF Research</p></footer>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="V8 Fuzz Lab의 CVE 증거 계보, Fuzzilli 비교군, 실행과 finding 검증 기준.">
+  <meta name="theme-color" content="#101820">
+  <meta property="og:title" content="연구 설계 · V8 Fuzz Lab">
+  <meta property="og:description" content="V8 Fuzz Lab의 CVE 증거 계보, Fuzzilli 비교군, 실행과 finding 검증 기준.">
+  <meta property="og:type" content="website">
+  <title>연구 설계 · V8 Fuzz Lab</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 이동</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="V8 Fuzz Lab 홈"><span class="brand-icon">V8<span> / </span></span><span>FUZZ LAB<small>LLMVF RESEARCH</small></span></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">메뉴 <span aria-hidden="true">☰</span></button>
+    <nav id="site-nav" aria-label="주요 메뉴"><a href="index.html">개요</a><a href="architecture.html" aria-current="page">연구 설계</a><a href="performance.html">실험 결과</a><a href="reports.html">CVE 기록</a></nav>
+  </header>
+  <main id="main">
+<section class="page-hero wrap"><span class="eyebrow">METHOD / 01</span><h1>재현에서 발견까지,<br><em>연결된 증거로.</em></h1><p>Experiment Manager가 상태·예산·corpus 승격을 통제하고, 에이전트의 제안은 스키마와 게이트를 통과한 후에만 다음 실행에 반영됩니다.</p></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">LINEAGE</span><h2>검증 가능한 연구 계보</h2></div><p>case → hypothesis → mapping → strategy → campaign → run → finding → report. 단계마다 입력, 출력, 출처와 실패 상태를 남깁니다.</p></div><div class="flow-grid"><article><span>01</span><h3>Evidence</h3><p>공식 출처와 commit을 연결해 CVE case를 만들고, 역사적 parent/fix를 반복 실행합니다.</p></article><article><span>02</span><h3>Mechanism & Mapping</h3><p>관찰된 실패 불변식을 가설로 분리하고 현재 V8 코드에 남은 경로를 찾습니다.</p></article><article><span>03</span><h3>Strategy & Campaign</h3><p>FuzzIL generator와 oracle을 제안하고 revision, corpus hash, seed, CPU, 예산을 동결합니다.</p></article><article><span>04</span><h3>Run & Review</h3><p>REPRL·coverage·입력 유효성 게이트를 통과한 run만 분석하고 후보는 독립 재현 후 검토합니다.</p></article></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">COMPARISON DESIGN</span><h2>같은 현재 V8에서 비교</h2></div><p>서로 다른 V8 버전의 raw coverage는 비교하지 않습니다. 비교군은 동일 초기 corpus, CPU, 시간과 실행 상한을 사용합니다.</p></div><div class="arm-grid"><article><span>B0 / BASELINE</span><h3>Stock Fuzzilli</h3><p>전용 CVE 전략을 넣지 않은 기준선.</p></article><article><span>B1 / FIXED</span><h3>CVE 전략</h3><p>역사 재현과 현재 매핑을 거친 generator를 고정 가중치로 추가.</p></article><article><span>B2 / ADAPTIVE</span><h3>단일 Agent</h3><p>검증된 이벤트에 따라 다음 window의 전략 가중치를 변경.</p></article><article><span>B3 / PLANNED</span><h3>역할 분리 Agent</h3><p>다중 에이전트 비교군. 현재 공개 결과에 완료 run으로 포함하지 않음.</p></article></div></div></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">GUARDRAILS</span><h2>무엇을 확인해야 하는가</h2></div><p>실행 가능성, 메커니즘 노출, 성능, 발견은 별개의 판정입니다.</p></div><div class="rule-list"><article><b>01 / 환경</b><p>V8·Fuzzilli·toolchain revision, binary와 입력 SHA-256, REPRL/coverage 상태를 검증합니다.</p></article><article><b>02 / 공정성</b><p>arm별 corpus를 분리하고 같은 시작점과 예산을 적용합니다. 승인된 변경은 다음 window부터 반영합니다.</p></article><article><b>03 / 관찰</b><p>target 구조가 실제 corpus에 남았는지 확인하고 edge coverage, 유효 입력, timeout, crash를 별도 집계합니다.</p></article><article><b>04 / 발견</b><p>후보를 축소·중복 제거·독립 재현한 뒤 사람 검토를 거쳐 finding으로 승격합니다.</p></article></div></section>
+<section class="source-note wrap"><strong>자료 기준</strong><p>v8-fuzz-lab의 README, architecture/workflow.md, architecture/integration.md, experiments/protocol.md 및 2026.10.23까지의 결과 기록을 요약했습니다.</p></section>
+</main>
+  <footer class="footer"><div><strong>V8 FUZZ LAB</strong><p>Historical CVE evidence → current V8 experiments.</p></div><div><span>근거 기준: v8-fuzz-lab <code>cac645968cc1</code></span><span>최종 반영 2026.10.23</span></div></footer>
+</body>
 </html>

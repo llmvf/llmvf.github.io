@@ -1,76 +1,32 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="LLMVF의 공개 실험 보고서와 연구 기록을 확인합니다." />
-    <meta name="theme-color" content="#050506" />
-    <title>Report — LLMVF</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css" />
-    <script src="script.js" defer></script>
-    <script src="dashboard.js" defer></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">본문으로 바로가기</a>
-    <div class="noise" aria-hidden="true"></div>
-    <header class="site-header scrolled" data-header>
-      <a class="brand" href="index.html" aria-label="LLMVF 홈">
-        <span class="brand-mark" aria-hidden="true">L/</span><span>LLMVF</span>
-      </a>
-      <div class="header-actions">
-        <nav aria-label="주요 메뉴">
-          <a href="index.html">Home</a>
-          <a href="architecture.html">Architecture</a>
-          <a href="performance.html">성과 요약</a>
-          <a class="active" href="reports.html">Report</a>
-          <a href="llm_variant_fuzz_agent/">Experiment Results</a>
-        </nav>
-        <a class="nav-cta" href="https://github.com/llmvf">GitHub ↗</a>
-        <button class="theme-toggle" type="button" aria-label="낮 모드로 전환" title="낮/밤 모드 전환">
-          <span aria-hidden="true">◐</span>
-        </button>
-      </div>
-    </header>
-
-    <main id="main" class="subpage">
-      <section class="page-hero reveal">
-        <div>
-          <p class="section-index">RESEARCH REPORTS</p>
-          <h1>검증된 결과를<br />기록합니다.</h1>
-        </div>
-        <p>
-          환경 검증, 실험 설계, 통계 결과와 한계를 함께 기록합니다.<br />
-          새로운 공개 보고서는 이 목록에 자동으로 추가됩니다.
-        </p>
-      </section>
-
-      <section class="report-toolbar reveal">
-        <div><span class="status-dot"></span><strong>공개 보고서</strong></div>
-        <p><span data-report-count>0</span>개 게시됨</p>
-      </section>
-
-      <section class="report-list" data-reports aria-live="polite">
-        <article class="report-empty reveal">
-          <span>NO PUBLIC REPORTS YET</span>
-          <h2>첫 번째 검증 보고서를<br />준비하고 있습니다.</h2>
-          <p>보고서가 게시되면 실험 대상, 실행일, 핵심 결과와 원문 링크가 여기에 표시됩니다.</p>
-        </article>
-      </section>
-
-      <section class="report-schema reveal">
-        <p class="section-index">REPORT CONTENTS</p>
-        <div><span>01</span><p>환경 및 버전 검증</p></div>
-        <div><span>02</span><p>Baseline / Guided 실험 설계</p></div>
-        <div><span>03</span><p>커버리지·충돌·재현 통계</p></div>
-        <div><span>04</span><p>해석, 한계와 재현 절차</p></div>
-      </section>
-    </main>
-
-    <footer>
-      <a class="brand" href="index.html"><span class="brand-mark">L/</span><span>LLMVF</span></a>
-      <p>LLM 기반 변종 취약점 분석 프레임워크</p>
-      <p>© <span data-year></span> LLMVF Research</p>
-    </footer>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="V8 역사적 CVE 재현과 현재 generator 이식 상태.">
+  <meta name="theme-color" content="#101820">
+  <meta property="og:title" content="CVE 기록 · V8 Fuzz Lab">
+  <meta property="og:description" content="V8 역사적 CVE 재현과 현재 generator 이식 상태.">
+  <meta property="og:type" content="website">
+  <title>CVE 기록 · V8 Fuzz Lab</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 이동</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="V8 Fuzz Lab 홈"><span class="brand-icon">V8<span> / </span></span><span>FUZZ LAB<small>LLMVF RESEARCH</small></span></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">메뉴 <span aria-hidden="true">☰</span></button>
+    <nav id="site-nav" aria-label="주요 메뉴"><a href="index.html">개요</a><a href="architecture.html">연구 설계</a><a href="performance.html">실험 결과</a><a href="reports.html" aria-current="page">CVE 기록</a></nav>
+  </header>
+  <main id="main">
+<section class="page-hero wrap"><span class="eyebrow">CASE FILES / 03</span><h1>CVE별 증거와<br><em>현재 상태.</em></h1><p>역사적 parent/fix 차이와 현재 V8용 전략의 상태를 구분합니다. 아래는 CVE 연구 기록이며 새 취약점 보고서 목록이 아닙니다.</p></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">MIGRATED CASES</span><h2>네 가지 메커니즘</h2></div><p>원본 기록의 replay와 mapping, strategy smoke를 기준으로 요약했습니다.</p></div><div class="case-grid"><article><div class="case-head"><span>WASM / LIFTOFF</span><b>MIGRATED</b></div><h3>CVE-2023-4070</h3><p>Wasm Liftoff register ownership과 alias 경로. 역사적 parent는 호환성 한 토큰 변경 후 3/3 SIGSEGV, fix는 3/3 정상 종료했습니다.</p><div class="case-meta"><span>현재 전략</span><strong>WasmGCLiveAliasGenerator</strong></div></article><article><div class="case-head"><span>WASM / GC</span><b>MIGRATED</b></div><h3>CVE-2023-4068</h3><p>Nullable internal reference의 default value. 무수정 공식 회귀 테스트에서 parent는 3/3 assertion 실패, fix는 3/3 정상 종료했습니다.</p><div class="case-meta"><span>현재 전략</span><strong>WasmGCDefaultRefFieldGenerator</strong></div></article><article><div class="case-head"><span>JIT / TURBOFAN</span><b>MIGRATED</b></div><h3>CVE-2020-6418</h3><p>Receiver-map reliability와 elements transition. 현재 전략은 4개 transition과 3개 consumer 차원으로 확장됐습니다.</p><div class="case-meta"><span>현재 전략</span><strong>JSReceiverMapSideEffectGenerator</strong></div></article><article><div class="case-head"><span>PARSER / SCOPE</span><b>MIGRATED</b></div><h3>CVE-2022-4262</h3><p>재파싱 시 eval scope 추적 불일치. 공개 축약 입력에서 dcheck parent는 3/3 bytecode mismatch, fix는 3/3 정상 종료했습니다.</p><div class="case-meta"><span>현재 전략</span><strong>ParserReparseEvalScopeGenerator</strong></div></article></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">EXCLUDED / NOT MIGRATED</span><h2>제외도 근거와 함께</h2></div></div><div class="exclusion"><span>CVE-2024-0519</span><div><h3>공개 replay oracle 부족</h3><p>Fix 연결은 확인했지만 공개 자료만으로 역사 재현을 검증할 oracle이 부족해 현재 연구 대상에서 제외했습니다. Generator나 발견 성과로 집계하지 않습니다.</p></div><b>EXCLUDED</b></div></div></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">STATUS CONTRACT</span><h2>상태를 읽는 법</h2></div></div><div class="status-line"><span>candidate</span><i>→</i><span>linked</span><i>→</i><span>historical_verified</span><i>→</i><span>migrated</span><i>→</i><span>approved</span></div><p class="status-explain">실행 중 관찰한 crash는 별도 candidate입니다. 최소화, 중복 검토, 독립 재현과 사람 검토를 마치기 전에는 검증된 bug 수에 넣지 않습니다.</p></section>
+<section class="source-note wrap"><strong>출처</strong><p>v8-fuzz-lab/README.md와 experiments/results의 각 CVE historical-replay, current-mapping, strategy-smoke 기록. CVE-2024-0519는 replay-eligibility 기록을 기준으로 했습니다.</p></section>
+</main>
+  <footer class="footer"><div><strong>V8 FUZZ LAB</strong><p>Historical CVE evidence → current V8 experiments.</p></div><div><span>근거 기준: v8-fuzz-lab <code>cac645968cc1</code></span><span>최종 반영 2026.10.23</span></div></footer>
+</body>
 </html>
