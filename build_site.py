@@ -67,13 +67,7 @@ home = '''
 <section class="closing wrap"><span class="eyebrow">RESEARCH PRINCIPLE</span><h2>실패와 null 결과도<br>연구 기록으로 남깁니다.</h2><p>Crash 후보는 독립 재현과 사람 검토 전까지 finding에 포함하지 않습니다. 데이터 재시작 이전 실행은 현재 결과에 승계하지 않습니다.</p><a class="button primary" href="architecture.html">검증 기준 읽기 →</a></section>
 '''
 
-architecture = '''
-<section class="page-hero wrap"><span class="eyebrow">METHOD / 01</span><h1>재현에서 발견까지,<br><em>연결된 증거로.</em></h1><p>Experiment Manager가 상태·예산·corpus 승격을 통제하고, 에이전트의 제안은 스키마와 게이트를 통과한 후에만 다음 실행에 반영됩니다.</p></section>
-<section class="section wrap"><div class="section-top"><div><span class="eyebrow">LINEAGE</span><h2>검증 가능한 연구 계보</h2></div><p>case → hypothesis → mapping → strategy → campaign → run → finding → report. 단계마다 입력, 출력, 출처와 실패 상태를 남깁니다.</p></div><div class="flow-grid"><article><span>01</span><h3>Evidence</h3><p>공식 출처와 commit을 연결해 CVE case를 만들고, 역사적 parent/fix를 반복 실행합니다.</p></article><article><span>02</span><h3>Mechanism & Mapping</h3><p>관찰된 실패 불변식을 가설로 분리하고 현재 V8 코드에 남은 경로를 찾습니다.</p></article><article><span>03</span><h3>Strategy & Campaign</h3><p>FuzzIL generator와 oracle을 제안하고 revision, corpus hash, seed, CPU, 예산을 동결합니다.</p></article><article><span>04</span><h3>Run & Review</h3><p>REPRL·coverage·입력 유효성 게이트를 통과한 run만 분석하고 후보는 독립 재현 후 검토합니다.</p></article></div></section>
-<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">COMPARISON DESIGN</span><h2>같은 현재 V8에서 비교</h2></div><p>서로 다른 V8 버전의 raw coverage는 비교하지 않습니다. 비교군은 동일 초기 corpus, CPU, 시간과 실행 상한을 사용합니다.</p></div><div class="arm-grid"><article><span>B0 / BASELINE</span><h3>Stock Fuzzilli</h3><p>전용 CVE 전략을 넣지 않은 기준선.</p></article><article><span>B1 / FIXED</span><h3>CVE 전략</h3><p>역사 재현과 현재 매핑을 거친 generator를 고정 가중치로 추가.</p></article><article><span>B2 / ADAPTIVE</span><h3>단일 Agent</h3><p>검증된 이벤트에 따라 다음 window의 전략 가중치를 변경.</p></article><article><span>B3 / PLANNED</span><h3>역할 분리 Agent</h3><p>다중 에이전트 비교군. 현재 공개 결과에 완료 run으로 포함하지 않음.</p></article></div></div></section>
-<section class="section wrap"><div class="section-top"><div><span class="eyebrow">GUARDRAILS</span><h2>무엇을 확인해야 하는가</h2></div><p>실행 가능성, 메커니즘 노출, 성능, 발견은 별개의 판정입니다.</p></div><div class="rule-list"><article><b>01 / 환경</b><p>V8·Fuzzilli·toolchain revision, binary와 입력 SHA-256, REPRL/coverage 상태를 검증합니다.</p></article><article><b>02 / 공정성</b><p>arm별 corpus를 분리하고 같은 시작점과 예산을 적용합니다. 승인된 변경은 다음 window부터 반영합니다.</p></article><article><b>03 / 관찰</b><p>target 구조가 실제 corpus에 남았는지 확인하고 edge coverage, 유효 입력, timeout, crash를 별도 집계합니다.</p></article><article><b>04 / 발견</b><p>후보를 축소·중복 제거·독립 재현한 뒤 사람 검토를 거쳐 finding으로 승격합니다.</p></article></div></section>
-<section class="source-note wrap"><strong>자료 기준</strong><p>v8-fuzz-lab의 README, architecture/workflow.md, architecture/integration.md, experiments/protocol.md 및 2026.10.23까지의 결과 기록을 요약했습니다.</p></section>
-'''
+architecture = (ROOT / "architecture_content.html").read_text(encoding="utf-8")
 
 performance = '''
 <section class="page-hero wrap"><span class="eyebrow">RESULTS / 02</span><h1>실험 결과와<br><em>남은 불확실성.</em></h1><p>2026년 10월 23일 기준 저장소에 기록된 완료 실험만 표시합니다. 아래의 crash 0은 기재된 실행 범위의 관찰값이며, 전체 시스템의 안전성을 뜻하지 않습니다.</p></section>
@@ -101,7 +95,11 @@ pages = {
 for filename, (title, body, description) in pages.items():
     (ROOT / filename).write_text(page(title, filename, body, description), encoding="utf-8")
 
-(ROOT / "styles.css").write_bytes((ROOT / "site_styles_new.css").read_bytes())
+(ROOT / "styles.css").write_bytes(
+    (ROOT / "site_styles_new.css").read_bytes()
+    + b"\n"
+    + (ROOT / "architecture_styles.css").read_bytes()
+)
 (ROOT / "script.js").write_text('''const button = document.querySelector('.menu-button');
 const navigation = document.querySelector('#site-nav');
 button?.addEventListener('click', () => {
@@ -130,7 +128,7 @@ Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current 
 
 ## Updating
 
-Edit `build_site.py` and `site_styles_new.css`, then run `py -3 build_site.py`. Commit the generated HTML, CSS, JavaScript, and favicon with the source changes. GitHub Pages serves the repository root without a build dependency.
+Edit `build_site.py`, `architecture_content.html`, `site_styles_new.css`, and `architecture_styles.css`, then run `py -3 build_site.py`. Commit the generated HTML, CSS, JavaScript, and favicon with the source changes. GitHub Pages serves the repository root without a build dependency.
 
 The old `/llm_variant_fuzz_agent/` route redirects to the new results page for existing links.
 ''', encoding="utf-8")

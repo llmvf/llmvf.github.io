@@ -20,12 +20,46 @@
     <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">메뉴 <span aria-hidden="true">☰</span></button>
     <nav id="site-nav" aria-label="주요 메뉴"><a href="index.html">개요</a><a href="architecture.html" aria-current="page">연구 설계</a><a href="performance.html">실험 결과</a><a href="reports.html">CVE 기록</a></nav>
   </header>
-  <main id="main">
-<section class="page-hero wrap"><span class="eyebrow">METHOD / 01</span><h1>재현에서 발견까지,<br><em>연결된 증거로.</em></h1><p>Experiment Manager가 상태·예산·corpus 승격을 통제하고, 에이전트의 제안은 스키마와 게이트를 통과한 후에만 다음 실행에 반영됩니다.</p></section>
-<section class="section wrap"><div class="section-top"><div><span class="eyebrow">LINEAGE</span><h2>검증 가능한 연구 계보</h2></div><p>case → hypothesis → mapping → strategy → campaign → run → finding → report. 단계마다 입력, 출력, 출처와 실패 상태를 남깁니다.</p></div><div class="flow-grid"><article><span>01</span><h3>Evidence</h3><p>공식 출처와 commit을 연결해 CVE case를 만들고, 역사적 parent/fix를 반복 실행합니다.</p></article><article><span>02</span><h3>Mechanism & Mapping</h3><p>관찰된 실패 불변식을 가설로 분리하고 현재 V8 코드에 남은 경로를 찾습니다.</p></article><article><span>03</span><h3>Strategy & Campaign</h3><p>FuzzIL generator와 oracle을 제안하고 revision, corpus hash, seed, CPU, 예산을 동결합니다.</p></article><article><span>04</span><h3>Run & Review</h3><p>REPRL·coverage·입력 유효성 게이트를 통과한 run만 분석하고 후보는 독립 재현 후 검토합니다.</p></article></div></section>
-<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">COMPARISON DESIGN</span><h2>같은 현재 V8에서 비교</h2></div><p>서로 다른 V8 버전의 raw coverage는 비교하지 않습니다. 비교군은 동일 초기 corpus, CPU, 시간과 실행 상한을 사용합니다.</p></div><div class="arm-grid"><article><span>B0 / BASELINE</span><h3>Stock Fuzzilli</h3><p>전용 CVE 전략을 넣지 않은 기준선.</p></article><article><span>B1 / FIXED</span><h3>CVE 전략</h3><p>역사 재현과 현재 매핑을 거친 generator를 고정 가중치로 추가.</p></article><article><span>B2 / ADAPTIVE</span><h3>단일 Agent</h3><p>검증된 이벤트에 따라 다음 window의 전략 가중치를 변경.</p></article><article><span>B3 / PLANNED</span><h3>역할 분리 Agent</h3><p>다중 에이전트 비교군. 현재 공개 결과에 완료 run으로 포함하지 않음.</p></article></div></div></section>
-<section class="section wrap"><div class="section-top"><div><span class="eyebrow">GUARDRAILS</span><h2>무엇을 확인해야 하는가</h2></div><p>실행 가능성, 메커니즘 노출, 성능, 발견은 별개의 판정입니다.</p></div><div class="rule-list"><article><b>01 / 환경</b><p>V8·Fuzzilli·toolchain revision, binary와 입력 SHA-256, REPRL/coverage 상태를 검증합니다.</p></article><article><b>02 / 공정성</b><p>arm별 corpus를 분리하고 같은 시작점과 예산을 적용합니다. 승인된 변경은 다음 window부터 반영합니다.</p></article><article><b>03 / 관찰</b><p>target 구조가 실제 corpus에 남았는지 확인하고 edge coverage, 유효 입력, timeout, crash를 별도 집계합니다.</p></article><article><b>04 / 발견</b><p>후보를 축소·중복 제거·독립 재현한 뒤 사람 검토를 거쳐 finding으로 승격합니다.</p></article></div></section>
-<section class="source-note wrap"><strong>자료 기준</strong><p>v8-fuzz-lab의 README, architecture/workflow.md, architecture/integration.md, experiments/protocol.md 및 2026.10.23까지의 결과 기록을 요약했습니다.</p></section>
+  <main id="main"><section class="page-hero architecture-hero wrap">
+  <span class="eyebrow">SYSTEM ARCHITECTURE / 01</span>
+  <h1>제안은 Agent가,<br><em>상태 전이는 검증기가.</em></h1>
+  <p>과거 CVE의 근거를 현재 V8 퍼징 전략으로 연결합니다. Experiment Manager만 campaign, queue, corpus, 예산을 변경하며 모든 제안과 결과는 기록·게이트를 통과합니다.</p>
+  <nav class="architecture-jump" aria-label="아키텍처 페이지 목차">
+    <a href="#system-map">01 전체 구조</a><a href="#lineage">02 증거 계보</a><a href="#control-loop">03 실행·피드백</a><a href="#validation">04 검증·복구</a>
+  </nav>
+</section>
+
+<section class="section wrap architecture-system" id="system-map" aria-labelledby="system-title">
+  <div class="section-top"><div><span class="eyebrow">01 / SYSTEM MAP</span><h2 id="system-title">하나의 제어면,<br>세 개의 작업 흐름</h2></div><p>준비 단계에서 전략을 만들고, Manager가 실행을 동결합니다. 실행 이벤트는 전략 갱신이나 후보 검증으로만 이어집니다.</p></div>
+  <div class="system-map" aria-label="근거 준비, Experiment Manager, 실행과 검증의 흐름">
+    <div class="map-band map-research"><div class="map-label"><span>RESEARCH</span><h3>근거 준비</h3><p>공개 CVE → 현재 V8</p></div><ol class="map-nodes"><li><small>01</small><strong>Evidence</strong><span>공지·패치·테스트의 출처와 SHA</span></li><li><small>02</small><strong>Mechanism</strong><span>역사 재현과 실패 불변식</span></li><li><small>03</small><strong>Mapping</strong><span>현재 코드 경로와 불확실성</span></li><li><small>04</small><strong>Strategy</strong><span>FuzzIL generator·oracle 제안</span></li></ol></div>
+    <div class="map-handoff"><span>검증된 strategy proposal</span><b aria-hidden="true">↓</b></div>
+    <div class="manager-band"><div><span class="eyebrow">DETERMINISTIC CONTROL PLANE</span><h3>Experiment Manager</h3><p>schema·출처·권한·예산을 검사하고 campaign을 동결합니다. queue, corpus, 설정, 상태 변경 권한은 이 제어면에만 있습니다.</p></div><ul><li>campaign manifest</li><li>window configuration</li><li>승인·거절 event log</li></ul></div>
+    <div class="map-split"><div><b aria-hidden="true">↓</b><span>동결된 실행</span></div><div><b aria-hidden="true">↓</b><span>관찰·검증</span></div></div>
+    <div class="map-bottom"><article><span>EXECUTION PLANE</span><h3>Fuzzilli + current V8</h3><p>REPRL·coverage gate를 통과한 window에서 실행 수, target hit, 유효 입력, timeout, crash를 원시 artifact로 남깁니다.</p></article><article><span>EVIDENCE PLANE</span><h3>Triage → Verification → Review</h3><p>후보를 중복 제거·최소화하고 별도 환경에서 반복 재현합니다. 사람 검토 후에만 검증된 finding으로 승격합니다.</p></article></div>
+  </div>
+  <p class="diagram-caption">Agent는 공유 상태를 직접 수정하지 않습니다. 실행 결과의 해석과 버그 판정도 executor가 수행하지 않습니다.</p>
+</section>
+
+<section class="section section-ink architecture-lineage" id="lineage" aria-labelledby="lineage-title"><div class="wrap">
+  <div class="section-top"><div><span class="eyebrow">02 / DATA CONTRACT</span><h2 id="lineage-title">레코드가 다음 단계를 증명합니다</h2></div><p>각 레코드는 부모 ID, 상태, source hash를 연결합니다. 관찰값을 보존하고 해석이 바뀌면 새 기록을 남깁니다.</p></div>
+  <ol class="lineage-chain" aria-label="CVE에서 보고서까지의 레코드 계보"><li><b>case</b><span>출처·fix/parent</span></li><li><b>hypothesis</b><span>실패 메커니즘</span></li><li><b>mapping</b><span>현재 V8 경로</span></li><li><b>strategy</b><span>FuzzIL·oracle</span></li><li><b>campaign</b><span>동결된 설정</span></li><li><b>run</b><span>원시 실행 증거</span></li><li><b>finding</b><span>독립 검증</span></li><li><b>report</b><span>검토된 결론</span></li></ol>
+  <div class="gate-triptych"><article><span>GATE / 01</span><h3>전략 승인</h3><p>현재 V8 SHA, 경로와 불변식이 확인되어야 strategy를 campaign으로 보낼 수 있습니다.</p></article><article><span>GATE / 02</span><h3>실행 시작</h3><p>campaign freeze와 d8·Fuzzilli·toolchain hash, 환경 manifest가 맞아야 run을 시작합니다.</p></article><article><span>GATE / 03</span><h3>버그 승격</h3><p>최소 입력, 별도 환경의 반복 재현, 중복 판정과 사람 검토가 있어야 bug로 기록합니다.</p></article></div>
+</div></section>
+
+<section class="section wrap architecture-loop" id="control-loop" aria-labelledby="loop-title">
+  <div class="section-top"><div><span class="eyebrow">03 / EXECUTION & FEEDBACK</span><h2 id="loop-title">Window 경계에서만 전략을 바꿉니다</h2></div><p>B2의 단일 Strategy Agent는 사전 등록된 이벤트에서만 제안합니다. Manager가 제안의 schema, allowlist, 예산을 검증한 뒤 다음 window 설정에 적용합니다.</p></div>
+  <div class="loop-layout"><div class="loop-steps"><article><span>01 / RUN</span><h3>동결된 window 실행</h3><p>시작 corpus와 generator weight는 window 중 바뀌지 않습니다. 실행과 contributor 통계를 snapshot으로 보존합니다.</p></article><article><span>02 / EVENT</span><h3>조건에 따른 호출</h3><p>새 target path, hit 정체, 반복 실패, 새 oracle candidate 중 등록된 trigger가 있을 때만 Agent를 호출합니다.</p></article><article><span>03 / PROPOSAL</span><h3>Agent 제안 검증</h3><p>허용된 weight 변경 또는 재검토 요청만 받습니다. 권한·event ID·token 상한을 벗어나면 거절 로그를 남깁니다.</p></article><article><span>04 / NEXT WINDOW</span><h3>승인된 설정 적용</h3><p>새 immutable configuration과 corpus hash를 기록하고 다음 window에만 반영합니다. 실패 시 직전 승인 설정으로 되돌립니다.</p></article></div><aside class="loop-ownership"><span class="eyebrow">WHO DECIDES?</span><div><b>Strategy Agent</b><p>다음 action을 제안</p></div><div><b>Experiment Manager</b><p>검증·승인·상태 변경</p></div><div><b>Fuzzilli executor</b><p>동결된 설정 실행·원시 증거 저장</p></div><div><b>Verification + human</b><p>후보 재현·최종 판정</p></div></aside></div>
+  <div class="comparison-note"><strong>비교군 계약</strong><div><span><b>B0</b> 기본 Fuzzilli</span><span><b>B1</b> CVE 전략 고정</span><span><b>B2</b> 단일 Agent 피드백</span><span><b>B3</b> 역할 분리 Agent · 계획</span></div><p>동일 current V8, 초기 corpus, CPU·실행·시간 예산을 기준으로 비교하며 arm 간 corpus는 분리합니다.</p></div>
+</section>
+
+<section class="section section-ink architecture-validation" id="validation" aria-labelledby="validation-title"><div class="wrap">
+  <div class="section-top"><div><span class="eyebrow">04 / VALIDATION & RECOVERY</span><h2 id="validation-title">관찰, 후보, 버그를 분리합니다</h2></div><p>target 도달이나 crash 한 건은 검증된 취약점이 아닙니다. 원시 결과와 실패 상태도 삭제하지 않고 남깁니다.</p></div>
+  <div class="decision-rail"><article><span>OBSERVATION</span><h3>실행 신호</h3><p>coverage·target hit·exit·signal·stdout/stderr hash</p></article><article><span>CANDIDATE</span><h3>분리된 검증 queue</h3><p>중복 제거, 최소화, 반복 재현 대상</p></article><article><span>VERIFICATION</span><h3>독립 환경</h3><p>최소 입력 hash, 원인 검토, 안정성 확인</p></article><article><span>REVIEWED</span><h3>사람 판정</h3><p>검증된 결과만 report의 bug 수에 포함</p></article></div>
+  <div class="recovery-list"><div><b>Mapping 실패</b><p>경로가 사라졌으면 전략을 보류하고 더 일반적인 불변식으로 되돌립니다.</p></div><div><b>환경 게이트 실패</b><p>REPRL·coverage·binary hash가 맞지 않으면 run을 무효로 분리하고 실행 전 단계로 돌아갑니다.</p></div><div><b>Window 실패</b><p>직전 승인 configuration과 시작 corpus에서 재개합니다. 실패 window의 corpus는 다음 단계로 전달하지 않습니다.</p></div><div><b>재현 실패</b><p>후보를 삭제하지 않고 <code>not_reproduced</code> 상태와 근거를 남깁니다.</p></div></div>
+</div></section>
+
+<section class="source-note wrap"><strong>자료 기준</strong><p>v8-fuzz-lab의 architecture/overview.md, workflow.md, data-contracts.md, b2-feedback-control.md와 experiments/protocol.md를 요약했습니다. B3는 설계상 비교군이며 완료 실험으로 표시하지 않습니다.</p></section>
 </main>
   <footer class="footer"><div><strong>V8 FUZZ LAB</strong><p>Historical CVE evidence → current V8 experiments.</p></div><div><span>근거 기준: v8-fuzz-lab <code>cac645968cc1</code></span><span>최종 반영 2026.10.23</span></div></footer>
 </body>

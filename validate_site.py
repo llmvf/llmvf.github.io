@@ -34,6 +34,11 @@ for name in PAGES:
 
 assert "18 / 18" in (ROOT / "performance.html").read_text(encoding="utf-8")
 assert "CVE-2024-0519" in (ROOT / "reports.html").read_text(encoding="utf-8")
+architecture = (ROOT / "architecture.html").read_text(encoding="utf-8")
+for anchor in ("system-map", "lineage", "control-loop", "validation"):
+    assert f'id="{anchor}"' in architecture
+    assert f'href="#{anchor}"' in architecture
+assert "Experiment Manager" in architecture and "B3" in architecture
 assert "performance.html" in (ROOT / "llm_variant_fuzz_agent/index.html").read_text(encoding="utf-8")
 assert not (ROOT / "llm_variant_fuzz_agent/data/results.json").exists()
 assert not (ROOT / "data/metrics.json").exists()

@@ -11,6 +11,6 @@ Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current 
 
 ## Updating
 
-Edit `build_site.py` and `site_styles_new.css`, then run `py -3 build_site.py`. Commit the generated HTML, CSS, JavaScript, and favicon with the source changes. GitHub Pages serves the repository root without a build dependency.
+Edit `build_site.py`, `architecture_content.html`, `site_styles_new.css`, and `architecture_styles.css`, then run `py -3 build_site.py`. Commit the generated HTML, CSS, JavaScript, and favicon with the source changes. GitHub Pages serves the repository root without a build dependency.
 
 The old `/llm_variant_fuzz_agent/` route redirects to the new results page for existing links.
