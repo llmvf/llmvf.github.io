@@ -32,7 +32,7 @@ for name in PAGES:
     assert "llm_variant_fuzz_agent/" not in content, name
     print(name, "OK", len(parser.targets), "links")
 
-assert "18 / 18" in (ROOT / "performance.html").read_text(encoding="utf-8")
+assert "v7 → v8 미러" in (ROOT / "performance.html").read_text(encoding="utf-8")
 assert "CVE-2024-0519" in (ROOT / "reports.html").read_text(encoding="utf-8")
 architecture = (ROOT / "architecture.html").read_text(encoding="utf-8")
 for anchor in ("system-map", "lineage", "control-loop", "validation"):
