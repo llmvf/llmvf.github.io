@@ -3,7 +3,7 @@
   <h1>제안은 Agent가,<br><em>상태 전이는 검증기가.</em></h1>
   <p>과거 CVE의 근거를 현재 V8 퍼징 전략으로 연결합니다. Experiment Manager만 campaign, queue, corpus, 예산을 변경하며 모든 제안과 결과는 기록·게이트를 통과합니다.</p>
   <nav class="architecture-jump" aria-label="아키텍처 페이지 목차">
-    <a href="#system-map">01 전체 구조</a><a href="#lineage">02 증거 계보</a><a href="#control-loop">03 실행·피드백</a><a href="#validation">04 검증·복구</a>
+    <a href="#system-map">01 전체 구조</a><a href="#lineage">02 증거 계보</a><a href="#control-loop">03 실행·피드백</a><a href="#validation">04 검증·복구</a><a href="#iterations">05 실험 v1–v8</a>
   </nav>
 </section>
 
@@ -36,5 +36,20 @@
   <div class="decision-rail"><article><span>OBSERVATION</span><h3>실행 신호</h3><p>coverage·target hit·exit·signal·stdout/stderr hash</p></article><article><span>CANDIDATE</span><h3>분리된 검증 queue</h3><p>중복 제거, 최소화, 반복 재현 대상</p></article><article><span>VERIFICATION</span><h3>독립 환경</h3><p>최소 입력 hash, 원인 검토, 안정성 확인</p></article><article><span>REVIEWED</span><h3>사람 판정</h3><p>검증된 결과만 report의 bug 수에 포함</p></article></div>
   <div class="recovery-list"><div><b>Mapping 실패</b><p>경로가 사라졌으면 전략을 보류하고 더 일반적인 불변식으로 되돌립니다.</p></div><div><b>환경 게이트 실패</b><p>REPRL·coverage·binary hash가 맞지 않으면 run을 무효로 분리하고 실행 전 단계로 돌아갑니다.</p></div><div><b>Window 실패</b><p>직전 승인 configuration과 시작 corpus에서 재개합니다. 실패 window의 corpus는 다음 단계로 전달하지 않습니다.</p></div><div><b>재현 실패</b><p>후보를 삭제하지 않고 <code>not_reproduced</code> 상태와 근거를 남깁니다.</p></div></div>
 </div></section>
+
+<section class="section wrap architecture-iterations" id="iterations" aria-labelledby="iter-title">
+  <div class="section-top"><div><span class="eyebrow">05 / EXPERIMENT ITERATIONS</span><h2 id="iter-title">적응 실험 v1 → v8</h2></div><p>LLM 피드백(B2) 비교 실험을 반복하며 바꾼 것과 관찰한 것입니다. 각 반복은 직전의 제약을 겨냥했고, 모든 반복에서 crash는 0이었습니다.</p></div>
+  <style>.iteration-list{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:12px}.iteration-list li{border-left:3px solid rgba(128,128,128,.35);padding:4px 0 4px 14px}.iteration-list b{display:block;margin-bottom:3px}.iteration-list p{margin:0;opacity:.85}</style>
+  <ol class="iteration-list">
+    <li><b>v1 · 피드백 파일럿</b><p>Codex CLI provider·제안 경로·window runner 배선을 smoke로 확인. 적응 효과 측정 이전 단계.</p></li>
+    <li><b>v2 · policy v2 / 적응효과</b><p>저가중치 action 1→6. 제어 경로는 통과했으나 조정 대상 hit 증가는 발동 4쌍 중 2쌍으로 효과 불확정.</p></li>
+    <li><b>v3 · policy v3 교정</b><p>weight 교정(≥20 invoc/window ≈ weight 100)으로 action 1→100. 발동 4쌍 중 3쌍에서 hit 양수(+6/+7), v2보다 뚜렷.</p></li>
+    <li><b>v4 · 장기 B0/B1/B2</b><p>네 generator·9 run·18 window. weight 변경이 마지막 window 뒤 발생해 적응 실행 window가 0.</p></li>
+    <li><b>v5 · 장기(중단)</b><p>강한 적응 재시도. 40k window에서 6번째 B2 콜 누적 input이 한도를 164토큰 초과해 중단(aborted 기록 보존).</p></li>
+    <li><b>v6 · 장기(완주)</b><p>30k window로 낮춰 9 run·18 window 완주(362,008 execs). 균형 weight 시작이라 발동률이 낮고 B2가 B1을 앞서지 않음.</p></li>
+    <li><b>v7 · 불균형 시작 + rollback</b><p>LiveAlias 1 / DefaultRef 20로 시작해 안정 발동. 3 B2 run 모두 1→100, 처음으로 B2가 B1을 일관되게 앞서는 양의 신호(interesting +4.6%·corpus +7.5% 중앙값). 단 n=3 저검정력.</p></li>
+    <li><b>v8 · 미러(방향 대칭)</b><p>방향을 뒤집음(DefaultRef-low). v7의 일반 우위가 재현되지 않고 음으로 뒤집힘(interesting −38·corpus −22). → v7 신호는 방향 특정 artifact, 적응 일반우월성 미입증.</p></li>
+  </ol>
+</section>
 
 <section class="source-note wrap"><strong>자료 기준</strong><p>v8-fuzz-lab의 architecture/overview.md, workflow.md, data-contracts.md, b2-feedback-control.md와 experiments/protocol.md를 요약했습니다. B3는 설계상 비교군이며 완료 실험으로 표시하지 않습니다.</p></section>
