@@ -4,7 +4,7 @@ Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current 
 
 ## Content baseline
 
-- Lab revision: `cac645968cc17fe7f7fe9d0befa161402407be8f` (2026-10-23)
+- Lab revision: `0628093fd2c3e92939b00b1524a73876fb7c1a5f` (2026-10-31)
 - Core sources: lab `README.md`, `architecture/workflow.md`, `architecture/integration.md`, `experiments/protocol.md`, and the named files in `experiments/results/`.
 - Experiment totals are kept per campaign. A historical replay, generator smoke, target hit, or coverage observation must not be presented as a new vulnerability finding.
 - The lab repository and raw artifacts may be private. This site publishes curated summaries only.

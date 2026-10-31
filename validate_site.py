@@ -32,8 +32,11 @@ for name in PAGES:
     assert "llm_variant_fuzz_agent/" not in content, name
     print(name, "OK", len(parser.targets), "links")
 
-assert "v7 → v8 미러" in (ROOT / "performance.html").read_text(encoding="utf-8")
+performance = (ROOT / "performance.html").read_text(encoding="utf-8")
+for marker in ("EXTERNAL HOLDOUT / FINAL", "9/9", "CVE-2021-38003", "CVE-2021-21225", "CVE-2022-1134"):
+    assert marker in performance, marker
 assert "CVE-2024-0519" in (ROOT / "reports.html").read_text(encoding="utf-8")
+assert "포트폴리오 최종 보고서 v2" in (ROOT / "reports.html").read_text(encoding="utf-8")
 architecture = (ROOT / "architecture.html").read_text(encoding="utf-8")
 for anchor in ("system-map", "lineage", "control-loop", "validation"):
     assert f'id="{anchor}"' in architecture
