@@ -5,6 +5,8 @@ Numbers and claims in these pages are curated from the lab revision named below.
 This script keeps the shared layout consistent across GitHub Pages entry points.
 """
 
+from __future__ import annotations
+
 import json
 from html import escape
 from pathlib import Path
@@ -286,6 +288,65 @@ timeline = f'''
 '''
 
 
+def case_interpretations(case: dict[str, object], comparison: dict[str, object] | None) -> list[dict[str, str]]:
+    history = str(case.get("history", ""))
+    mapping = str(case.get("mapping", ""))
+    smoke = case.get("smoke_metrics")
+    lower_lineage = f"{history} {mapping}".lower()
+    if "surface retired" in lower_lineage:
+        rq1 = ("역사만 검증", "limited", f"역사 재현은 {history}이지만 current surface가 제거되어 현재 generator 전이에는 적용하지 않습니다.")
+    elif any(marker in lower_lineage for marker in ("oracle 없음", "차등 없음")):
+        rq1 = ("근거 미달", "pending", f"역사 경계가 {history} 상태라 current-V8 generator 계보를 확정하지 않습니다.")
+    elif smoke and any(marker in mapping.lower() for marker in ("verified", "present")):
+        target = metric_value(smoke.get("target_hits"))
+        rq1 = ("연결 완료", "supported", f"역사 {history} → current mapping {mapping} → smoke target hit {target}의 계보가 연결됐습니다.")
+    elif smoke:
+        rq1 = ("부분 지원", "limited", f"Generator smoke 지표는 있으나 역사 또는 current mapping 근거가 제한적입니다: {history} / {mapping}.")
+    else:
+        rq1 = ("미평가", "pending", f"현재 상태는 {history} / {mapping}이며 구조화된 generator smoke 지표가 없습니다.")
+
+    if comparison:
+        positive = sum(value > 0 for value in comparison["deltas"])
+        total = len(comparison["deltas"])
+        rq2_status = "지원" if positive == total else "혼합"
+        rq2_tone = "supported" if positive == total else "limited"
+        rq2 = (rq2_status, rq2_tone, f"B2−B1 target hit은 {delta_list(comparison['deltas'])}, 중앙값 +{comparison['median']}, 양수 {positive}/{total}입니다.")
+
+        metrics = comparison["general_metrics"]
+        general_text = (
+            f"Interesting {format_signed(metrics['interesting'], 0, '')}, "
+            f"corpus {format_signed(metrics['corpus'], 0, '')}, "
+            f"coverage {format_signed(metrics['coverage_pp'], 2, '%p')}입니다."
+        )
+        if comparison["general_effect"] == "지원" and "development" in str(comparison["role"]).lower():
+            rq3 = ("탐색적 양성", "limited", general_text + " 개발 자료이므로 confirmatory 일반 우월성 주장에는 포함하지 않습니다.")
+        elif comparison["general_effect"] == "지원":
+            rq3 = ("지원", "supported", general_text + " 이 campaign 안에서는 세 일반 지표가 같은 방향입니다.")
+        else:
+            rq3 = ("미지지", "unsupported", general_text + " 지표 방향이 일관되지 않아 일반 퍼징 우월성을 지지하지 않습니다.")
+
+        rollback = comparison.get("rollback_evidence") == "평가 기록 있음" or "rollback" in str(case.get("comparison", "")).lower()
+        crashes = sum((row.get("crashes") or 0) for row in comparison.get("arm_results", []))
+        timeout_values = [row.get("timeouts") for row in comparison.get("arm_results", []) if row.get("timeouts") is not None]
+        timeout_text = f", timeout 합계 {sum(timeout_values)}" if timeout_values else ""
+        if rollback:
+            rq4 = ("평가 기록 있음", "supported", f"Rollback 평가 기록이 있습니다. 관찰 arm의 crash 합계는 {crashes}{timeout_text}이며, 이는 일반 성능 개선 증거와는 별개입니다.")
+        else:
+            rq4 = ("개별 판정 없음", "pending", f"이 CVE 공개 보고서에는 rollback 개별 판정이 없습니다. 관찰 arm의 crash 합계는 {crashes}{timeout_text}입니다.")
+    else:
+        reason = str(case.get("comparison", ""))
+        rq2 = ("미평가", "pending", f"완료된 B0/B1/B2 outcome이 없어 목표 재배분 효과를 판정하지 않습니다: {reason}.")
+        rq3 = ("미평가", "pending", "Paired arm 결과가 없으므로 coverage·corpus·interesting의 전이 효과도 판정하지 않습니다.")
+        rq4 = ("미평가", "pending", "실행된 비교 campaign의 rollback 기록이 없어 CVE별 판정을 내리지 않습니다.")
+
+    return [
+        {"label": "RQ1 · 안전한 CVE 전이", "status": rq1[0], "tone": rq1[1], "detail": rq1[2]},
+        {"label": "RQ2 · 목표 재배분", "status": rq2[0], "tone": rq2[1], "detail": rq2[2]},
+        {"label": "RQ3 · 일반 효과 전이", "status": rq3[0], "tone": rq3[1], "detail": rq3[2]},
+        {"label": "RQ4 · Rollback", "status": rq4[0], "tone": rq4[1], "detail": rq4[2]},
+    ]
+
+
 def case_detail(case: dict[str, object]) -> str:
     comparison = COMPARISON_BY_ID.get(case["id"])
     smoke = case.get("smoke_metrics")
@@ -319,8 +380,19 @@ def case_detail(case: dict[str, object]) -> str:
             "</tr>"
             for row in comparison.get("arm_results", [])
         )
+        arm_results = comparison.get("arm_results", [])
+        max_target = max((row.get("target_hits") or 0 for row in arm_results), default=1) or 1
+        target_groups = []
+        for repetition in sorted({int(row["repetition"]) for row in arm_results}):
+            rows = {row["arm"]: row for row in arm_results if int(row["repetition"]) == repetition}
+            bars = "".join(
+                f'<div><span class="arm-label arm-{arm.lower()}">{arm}</span><i><b class="arm-bar-{arm.lower()}" style="width:{(rows.get(arm, {}).get("target_hits") or 0) / max_target * 100:.2f}%"></b></i><strong>{e(metric_value(rows.get(arm, {}).get("target_hits")))}</strong></div>'
+                for arm in ("B0", "B1", "B2")
+            )
+            target_groups.append(f'<article><h3>R{repetition}</h3><div>{bars}</div></article>')
+        target_chart = "".join(target_groups)
         comparison_block = f'''
-<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">B0 / B1 / B2 RESULTS</span><h2>Arm별 실행 지표</h2></div><p>{e(comparison['role'])} · {e(comparison['report'])}</p></div><div class="result-table-wrap" tabindex="0" aria-label="{e(case['id'])} B0 B1 B2 반복별 결과표, 작은 화면에서는 가로로 스크롤"><table class="arm-result-table"><thead><tr><th>반복</th><th>arm</th><th>Target hit</th><th>Executions</th><th>Interesting</th><th>Corpus</th><th>Coverage</th><th>Crash</th><th>Timeout</th></tr></thead><tbody>{arm_rows}</tbody></table></div><div class="paired-summary"><div class="section-top"><div><span class="eyebrow">PAIRED OUTCOME</span><h2>B2−B1 target hit</h2></div><p>같은 반복의 B2와 B1을 짝지어 계산합니다.</p></div><div class="case-repeat-chart" role="img" aria-label="{e(case['id'])} B2 빼기 B1 target hit {e(delta_list(comparison['deltas']))}">{repeat_rows}</div><div class="stat-grid"><article><span>중앙 target delta</span><strong>+{e(comparison['median'])}</strong><small>{e(delta_list(comparison['deltas']))}</small></article><article><span>Interesting 중앙값</span><strong>{e(format_signed(metrics['interesting'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Corpus 중앙값</span><strong>{e(format_signed(metrics['corpus'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Coverage 중앙값</span><strong>{e(format_signed(metrics['coverage_pp'], 2, '%p'))}</strong><small>B2−B1</small></article></div></div></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">B0 / B1 / B2 RESULTS</span><h2>Arm별 실행 지표</h2></div><p>{e(comparison['role'])} · {e(comparison['report'])}</p></div><div class="arm-target-figure"><div class="chart-heading"><h3>반복별 target hit</h3><p>모든 arm을 같은 0–{e(max_target)} 축에 표시합니다. 막대 길이와 우측 정확값을 함께 읽으세요.</p></div><div class="arm-target-legend"><span><i class="arm-bar-b0"></i>B0 baseline</span><span><i class="arm-bar-b1"></i>B1 fixed</span><span><i class="arm-bar-b2"></i>B2 adaptive</span></div><div class="arm-target-chart" role="img" aria-label="{e(case['id'])} 반복별 B0 B1 B2 target hit 비교">{target_chart}</div><div class="arm-axis"><span>0</span><span>{e(max_target)}</span></div></div><details class="metric-table-disclosure"><summary>반복별 전체 수치 표 보기</summary><div class="result-table-wrap" tabindex="0" aria-label="{e(case['id'])} B0 B1 B2 반복별 결과표, 작은 화면에서는 가로로 스크롤"><table class="arm-result-table"><thead><tr><th>반복</th><th>arm</th><th>Target hit</th><th>Executions</th><th>Interesting</th><th>Corpus</th><th>Coverage</th><th>Crash</th><th>Timeout</th></tr></thead><tbody>{arm_rows}</tbody></table></div></details><div class="paired-summary"><div class="section-top"><div><span class="eyebrow">PAIRED OUTCOME</span><h2>B2−B1 target hit</h2></div><p>같은 반복의 B2와 B1을 짝지어 계산합니다.</p></div><div class="case-repeat-chart" role="img" aria-label="{e(case['id'])} B2 빼기 B1 target hit {e(delta_list(comparison['deltas']))}">{repeat_rows}</div><div class="stat-grid"><article><span>중앙 target delta</span><strong>+{e(comparison['median'])}</strong><small>{e(delta_list(comparison['deltas']))}</small></article><article class="metric-{('positive' if metrics['interesting'] > 0 else 'negative' if metrics['interesting'] < 0 else 'neutral')}"><span>Interesting 중앙값</span><strong>{e(format_signed(metrics['interesting'], 0, ''))}</strong><small>B2−B1</small></article><article class="metric-{('positive' if metrics['corpus'] > 0 else 'negative' if metrics['corpus'] < 0 else 'neutral')}"><span>Corpus 중앙값</span><strong>{e(format_signed(metrics['corpus'], 0, ''))}</strong><small>B2−B1</small></article><article class="metric-{('positive' if metrics['coverage_pp'] > 0 else 'negative' if metrics['coverage_pp'] < 0 else 'neutral')}"><span>Coverage 중앙값</span><strong>{e(format_signed(metrics['coverage_pp'], 2, '%p'))}</strong><small>B2−B1</small></article></div></div></div></section>
 '''
     else:
         status = no_outcome_status(case)
@@ -331,11 +403,20 @@ def case_detail(case: dict[str, object]) -> str:
         comparison_block = f'''
 <section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">B0 / B1 / B2 RESULTS</span><h2>Arm별 실행 상태</h2></div><p>값이 없는 arm은 0이 아니라 미실행·보류·비적용입니다.</p></div><div class="result-table-wrap" tabindex="0" aria-label="{e(case['id'])} B0 B1 B2 실행 상태표"><table class="arm-result-table arm-status-table"><thead><tr><th>arm</th><th>상태</th><th colspan="7">근거</th></tr></thead><tbody>{pending_rows}</tbody></table></div></div></section>
 '''
+    interpretations = case_interpretations(case, comparison)
+    interpretation_cards = "".join(
+        f'<article class="rq-card tone-{e(item["tone"])}"><div><span>{e(item["label"])}</span><b>{e(item["status"])}</b></div><p>{e(item["detail"])}</p></article>'
+        for item in interpretations
+    )
+    interpretation_block = f'''
+<section class="section wrap rq-section"><div class="section-top"><div><span class="eyebrow">CASE-LEVEL INTERPRETATION</span><h2>이 CVE가 연구 질문에 주는 답</h2></div><p>개별 case의 증거 역할을 표시합니다. 개발·holdout·external holdout을 서로 같은 확증 수준으로 합치지 않습니다.</p></div><div class="rq-grid">{interpretation_cards}</div><div class="claim-boundary"><strong>주장 경계</strong><p>Target hit 증가는 선택한 current-V8 구조의 도달 증가입니다. Live vulnerability 재발견, exploitability 또는 신규 버그 발견을 뜻하지 않습니다.</p></div></section>
+'''
     return f'''
 <section class="page-hero wrap"><span class="eyebrow">CVE CASE / {e(case['status']).upper()}</span><h1>{e(case['id'])}<br><em>{e(case['mechanism'])}.</em></h1><p>{e(case['role'])} 증거 집단의 case입니다. 각 단계의 완료·미실행·비적용 상태를 분리해 표시합니다.</p><div class="actions"><a class="button secondary" href="reports.html">전체 CVE로 돌아가기 <span>←</span></a><a class="button secondary" href="performance.html#all-paired-campaigns">비교 그래프 보기 <span>→</span></a></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">EVIDENCE GATES</span><h2>현재 증거 상태</h2></div></div><div class="evidence-grid"><article><span>01 · 역사 재현</span><h3>{e(case['history'])}</h3><p>공개 입력 또는 제한된 authored oracle로 parent/fix 경계를 평가한 상태입니다.</p></article><article><span>02 · Current mapping</span><h3>{e(case['mapping'])}</h3><p>현재 V8에 남은 불변식·표면과 실행 도달 여부입니다.</p></article><article><span>03 · Generator</span><h3>{e(case['generator'])}</h3><p>Fuzzilli 전략의 방출·유효 실행·구조 hit 검증 상태입니다.</p></article><article><span>04 · 비교 / 처분</span><h3>{e(case['comparison'])}</h3><p>완료된 B0/B1/B2 outcome 또는 비적용·보류 근거입니다.</p></article></div></section>
 {smoke_block}
 {comparison_block}
+{interpretation_block}
 <section class="source-note wrap"><strong>Provenance</strong><p>근거 기준 <code>{LAB_REVISION[:12]}</code>. 원본 분석은 권한 보유자가 <a href="https://github.com/llmvf/v8-fuzz-lab/tree/main/cve/{e(case['id'])}">{e(case['id'])} 연구 폴더</a>에서 확인할 수 있습니다. Target hit과 smoke는 live vulnerability 또는 신규 버그 주장이 아닙니다.</p></section>
 '''
 

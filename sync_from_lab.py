@@ -174,6 +174,7 @@ def parse_comparison(path: Path, case: dict[str, object], prior: dict[str, objec
         },
         "tokens": tokens,
         "crashes": 0 if re.search(r"crash(?:나|와|/failure)?\s*0|crash[^\n]{0,30}없", text, re.I) else None,
+        "rollback_evidence": "평가 기록 있음" if re.search(r"rollback|롤백", text, re.I) else "개별 보고서 근거 없음",
         "report": path.stem,
         "arm_results": parse_arm_results(text),
     }

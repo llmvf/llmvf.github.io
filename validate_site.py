@@ -124,9 +124,13 @@ for case in DATA["cve_cases"]:
         assert "정량 smoke 결과 없음" in detail, case["id"]
     comparison = next((item for item in DATA["comparison_campaigns"] if item["id"] == case["id"]), None)
     if comparison:
-        assert detail.count('class="arm-label arm-') == 9, case["id"]
+        assert detail.count('class="arm-label arm-') == 18, case["id"]
+        assert 'class="arm-target-chart"' in detail, case["id"]
         for row in comparison["arm_results"]:
             assert str(row["target_hits"]) in detail, (case["id"], row)
+    assert detail.count('class="rq-card tone-') == 4, case["id"]
+    for rq in ("RQ1 · 안전한 CVE 전이", "RQ2 · 목표 재배분", "RQ3 · 일반 효과 전이", "RQ4 · Rollback"):
+        assert rq in detail, (case["id"], rq)
 timeline = (ROOT / "timeline.html").read_text(encoding="utf-8")
 assert timeline.count('class="timeline-entry"') == len(DATA["timeline"])
 assert len(DATA["timeline"]) >= 10
