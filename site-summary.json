@@ -23,100 +23,503 @@
       "id": "CVE-2021-38003",
       "mechanism": "JSON exception path",
       "generator": "JSONStringifyExceptionPathGenerator",
-      "deltas": [17, 1, 42],
+      "role": "external holdout",
+      "deltas": [
+        17,
+        1,
+        42
+      ],
       "median": 17,
-      "general_effect": "미지지"
+      "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": -214,
+        "corpus": -104,
+        "coverage_pp": -0.21
+      },
+      "tokens": 125814,
+      "crashes": null,
+      "report": "CVE-2021-38003-b012-holdout-v1"
     },
     {
       "id": "CVE-2021-21225",
       "mechanism": "Array species",
       "generator": "ArrayConcatSpeciesSideEffectGenerator",
-      "deltas": [37, 1, 37],
+      "role": "external holdout",
+      "deltas": [
+        37,
+        1,
+        37
+      ],
       "median": 37,
-      "general_effect": "미지지"
+      "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": 8,
+        "corpus": -40,
+        "coverage_pp": -0.06
+      },
+      "tokens": 125384,
+      "crashes": 0,
+      "report": "CVE-2021-21225-b012-holdout-v1"
     },
     {
       "id": "CVE-2022-1134",
       "mechanism": "super IC/API getter",
       "generator": "SuperICApiGetterGenerator",
-      "deltas": [32, 48, 51],
+      "role": "external holdout",
+      "deltas": [
+        32,
+        48,
+        51
+      ],
       "median": 48,
-      "general_effect": "미지지"
+      "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": 86,
+        "corpus": 58,
+        "coverage_pp": -0.05
+      },
+      "tokens": 131384,
+      "crashes": 0,
+      "report": "CVE-2022-1134-b012-holdout-v1.1"
     }
   ],
   "comparison_campaigns": [
     {
       "id": "CVE-2023-4068",
       "mechanism": "Wasm GC default reference",
+      "generator": "WasmGCDefaultRefFieldGenerator",
       "role": "cross-family development",
-      "deltas": [24, 22, 20],
+      "deltas": [
+        24,
+        22,
+        20
+      ],
       "median": 22,
       "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": -46,
+        "corpus": -41,
+        "coverage_pp": 0.12
+      },
+      "tokens": 135196,
+      "crashes": null,
       "report": "CVE-2023-4068-b012-cross-family-v1"
     },
     {
       "id": "CVE-2023-4069",
       "mechanism": "Maglev initial-map validity",
+      "generator": "MaglevInitialMapValidityGenerator",
       "role": "holdout",
-      "deltas": [17, 24, 19],
+      "deltas": [
+        17,
+        24,
+        19
+      ],
       "median": 19,
       "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": -69,
+        "corpus": -38,
+        "coverage_pp": -0.1
+      },
+      "tokens": 138446,
+      "crashes": null,
       "report": "CVE-2023-4069-b012-full-v1"
     },
     {
       "id": "CVE-2024-5838",
       "mechanism": "Wasm import/JSPI wrapper",
+      "generator": "WasmImportWrapperJSPIGenerator",
       "role": "development",
-      "deltas": [2, 10, 20],
+      "deltas": [
+        2,
+        10,
+        20
+      ],
       "median": 10,
-      "general_effect": "미지지",
+      "general_effect": "지원",
+      "general_metrics": {
+        "interesting": 66,
+        "corpus": 8,
+        "coverage_pp": 0.09
+      },
+      "tokens": 123951,
+      "crashes": null,
       "report": "CVE-2024-5838-b012-development-v1.1"
     },
     {
       "id": "CVE-2021-38003",
       "mechanism": "JSON exception path",
+      "generator": "JSONStringifyExceptionPathGenerator",
       "role": "external holdout",
-      "deltas": [17, 1, 42],
+      "deltas": [
+        17,
+        1,
+        42
+      ],
       "median": 17,
       "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": -214,
+        "corpus": -104,
+        "coverage_pp": -0.21
+      },
+      "tokens": 125814,
+      "crashes": null,
       "report": "CVE-2021-38003-b012-holdout-v1"
     },
     {
       "id": "CVE-2021-21225",
       "mechanism": "Array species",
+      "generator": "ArrayConcatSpeciesSideEffectGenerator",
       "role": "external holdout",
-      "deltas": [37, 1, 37],
+      "deltas": [
+        37,
+        1,
+        37
+      ],
       "median": 37,
       "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": 8,
+        "corpus": -40,
+        "coverage_pp": -0.06
+      },
+      "tokens": 125384,
+      "crashes": 0,
       "report": "CVE-2021-21225-b012-holdout-v1"
     },
     {
       "id": "CVE-2022-1134",
       "mechanism": "super IC/API getter",
+      "generator": "SuperICApiGetterGenerator",
       "role": "external holdout",
-      "deltas": [32, 48, 51],
+      "deltas": [
+        32,
+        48,
+        51
+      ],
       "median": 48,
       "general_effect": "미지지",
+      "general_metrics": {
+        "interesting": 86,
+        "corpus": 58,
+        "coverage_pp": -0.05
+      },
+      "tokens": 131384,
+      "crashes": 0,
       "report": "CVE-2022-1134-b012-holdout-v1.1"
     }
   ],
   "cve_cases": [
-    {"id":"CVE-2020-6418","status":"migrated","stage":"migrated","role":"development","mechanism":"TurboFan receiver-map","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"공동 development campaign 포함"},
-    {"id":"CVE-2022-4262","status":"migrated","stage":"migrated","role":"development","mechanism":"Parser eval-scope","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"공동 development campaign 포함"},
-    {"id":"CVE-2023-4070","status":"migrated","stage":"migrated","role":"development","mechanism":"Wasm Liftoff alias","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"장기·교차계열 campaign 포함"},
-    {"id":"CVE-2023-4068","status":"migrated","stage":"migrated","role":"cross-family development","mechanism":"Wasm GC default reference","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"B2−B1 [24,22,20] · 중앙값 +22"},
-    {"id":"CVE-2024-0519","status":"excluded","stage":"excluded","role":"자료 부족","mechanism":"공개 replay oracle 부족","history":"oracle 없음","mapping":"미실행","generator":"미실행","comparison":"제외"},
-    {"id":"CVE-2020-16040","status":"migrated","stage":"migrated","role":"development","mechanism":"TurboFan integer truncation","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"후속 paired 비교 대기"},
-    {"id":"CVE-2024-0517","status":"linked","stage":"linked","role":"invariant-only","mechanism":"Maglev allocation folding","history":"차등 미재현","mapping":"verified","generator":"smoke 완료","comparison":"calibration pilot만 완료"},
-    {"id":"CVE-2024-5838","status":"migrated","stage":"migrated","role":"development","mechanism":"Wasm import/JSPI wrapper","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"B2−B1 [2,10,20] · 중앙값 +10"},
-    {"id":"CVE-2023-3420","status":"linked","stage":"linked","role":"development","mechanism":"TurboFan loop stack-check","history":"fix-diff only","mapping":"present_refactored","generator":"방출 smoke 완료","comparison":"paired 비교 미실행"},
-    {"id":"CVE-2023-2033","status":"historical_verified","stage":"historical_verified","role":"development","mechanism":"Error stack/global proxy","history":"3/3 구조 차등","mapping":"verified","generator":"smoke 완료 · target 172","comparison":"B0/B1/B2 v1 동결 · 실행 대기"},
-    {"id":"CVE-2023-4069","status":"migrated","stage":"migrated","role":"holdout","mechanism":"Maglev initial-map validity","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"full [17,24,19] · transfer [3,5,5] · rollback 완료"},
-    {"id":"CVE-2021-38003","status":"migrated","stage":"migrated","role":"external holdout","mechanism":"JSON exception path","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"B2−B1 [17,1,42] · 중앙값 +17"},
-    {"id":"CVE-2021-21225","status":"migrated","stage":"migrated","role":"external holdout","mechanism":"Array concat/species","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"B2−B1 [37,1,37] · 중앙값 +37"},
-    {"id":"CVE-2022-1134","status":"migrated","stage":"migrated","role":"external holdout","mechanism":"super IC/API getter","history":"verified","mapping":"verified","generator":"smoke 완료","comparison":"B2−B1 [32,48,51] · 중앙값 +48"},
-    {"id":"CVE-2024-3832","status":"historical_verified","stage":"historical_verified","role":"external holdout","mechanism":"Wasm JSPI object selection","history":"verified","mapping":"surface retired","generator":"비적용","comparison":"CVE campaign 비적용"},
-    {"id":"CVE-2024-3833","status":"historical_verified","stage":"historical_verified","role":"external holdout","mechanism":"Wasm type-reflection collision","history":"verified","mapping":"surface retired","generator":"비적용","comparison":"3832 sibling cluster"},
-    {"id":"CVE-2022-1096","status":"linked / deferred","stage":"deferred","role":"external holdout","mechanism":"Blink interceptor boundary","history":"차등 없음","mapping":"Blink lane 필요","generator":"보류","comparison":"Blink replay 확보 전 보류"}
+    {
+      "id": "CVE-2020-6418",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "development",
+      "mechanism": "TurboFan receiver-map",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "공동 development campaign 포함",
+      "source_role": "개발 후보",
+      "generator_name": "JSReceiverMapSideEffectGenerator"
+    },
+    {
+      "id": "CVE-2022-4262",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "development",
+      "mechanism": "Parser eval-scope",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "공동 development campaign 포함",
+      "source_role": "개발 후보",
+      "generator_name": "ParserReparseEvalScopeGenerator"
+    },
+    {
+      "id": "CVE-2023-4070",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "development",
+      "mechanism": "Wasm Liftoff alias",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "장기·교차계열 campaign 포함",
+      "source_role": "개발 후보",
+      "generator_name": "WasmGCLiveAliasGenerator"
+    },
+    {
+      "id": "CVE-2023-4068",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "cross-family development",
+      "mechanism": "Wasm GC default reference",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [24, 22, 20] · 중앙값 +22",
+      "source_role": "개발 후보",
+      "generator_name": "WasmGCDefaultRefFieldGenerator"
+    },
+    {
+      "id": "CVE-2024-0519",
+      "status": "excluded",
+      "stage": "excluded",
+      "role": "자료 부족",
+      "mechanism": "공개 replay oracle 부족",
+      "history": "oracle 없음",
+      "mapping": "미실행",
+      "generator": "미실행",
+      "comparison": "제외",
+      "source_role": "자료 부족"
+    },
+    {
+      "id": "CVE-2020-16040",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "development",
+      "mechanism": "TurboFan integer truncation",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "후속 paired 비교 대기",
+      "source_role": "개발 후보(5번째 migrated)",
+      "generator_name": "SimplifiedLoweringTruncationGenerator"
+    },
+    {
+      "id": "CVE-2024-0517",
+      "status": "linked",
+      "stage": "linked",
+      "role": "invariant-only",
+      "mechanism": "Maglev allocation folding",
+      "history": "차등 미재현",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "calibration pilot만 완료",
+      "source_role": "개발 후보(5번째 계열)",
+      "generator_name": "MaglevAllocationFoldingGenerator"
+    },
+    {
+      "id": "CVE-2024-5838",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "development",
+      "mechanism": "Wasm import/JSPI wrapper",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [2, 10, 20] · 중앙값 +10",
+      "source_role": "개발 후보(2024 Wasm/JS 경계)",
+      "generator_name": "WasmImportWrapperJSPIGenerator"
+    },
+    {
+      "id": "CVE-2023-3420",
+      "status": "linked",
+      "stage": "linked",
+      "role": "development",
+      "mechanism": "TurboFan loop stack-check",
+      "history": "fix-diff only",
+      "mapping": "present_refactored",
+      "generator": "방출 smoke 완료",
+      "comparison": "paired 비교 미실행",
+      "source_role": "개발(dev)"
+    },
+    {
+      "id": "CVE-2023-2033",
+      "status": "historical_verified",
+      "stage": "historical_verified",
+      "role": "development",
+      "mechanism": "Error stack/global proxy",
+      "history": "3/3 구조 차등",
+      "mapping": "verified",
+      "generator": "smoke 완료 · target 172",
+      "comparison": "B0/B1/B2 v1 동결 · 실행 대기",
+      "source_role": "개발 후보(Error stack/global proxy)",
+      "generator_name": "ErrorStackGlobalCaptureGenerator"
+    },
+    {
+      "id": "CVE-2023-4069",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "holdout",
+      "mechanism": "Maglev initial-map validity",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [17, 24, 19] · 중앙값 +19 · transfer [3,5,5] · rollback 완료",
+      "source_role": "**holdout**(Maglev 전이평가)",
+      "generator_name": "MaglevInitialMapValidityGenerator"
+    },
+    {
+      "id": "CVE-2021-38003",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "external holdout",
+      "mechanism": "JSON exception path",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [17, 1, 42] · 중앙값 +17",
+      "source_role": "**external holdout**(runtime 계열)",
+      "generator_name": "JSONStringifyExceptionPathGenerator"
+    },
+    {
+      "id": "CVE-2021-21225",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "external holdout",
+      "mechanism": "Array concat/species",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [37, 1, 37] · 중앙값 +37",
+      "source_role": "**external holdout**(Array/typed-array 계열)",
+      "generator_name": "ArrayConcatSpeciesSideEffectGenerator"
+    },
+    {
+      "id": "CVE-2022-1134",
+      "status": "migrated",
+      "stage": "migrated",
+      "role": "external holdout",
+      "mechanism": "super IC/API getter",
+      "history": "verified",
+      "mapping": "verified",
+      "generator": "smoke 완료",
+      "comparison": "B2−B1 [32, 48, 51] · 중앙값 +48",
+      "source_role": "**external holdout**(super IC/API getter 계열)",
+      "generator_name": "SuperICApiGetterGenerator"
+    },
+    {
+      "id": "CVE-2024-3832",
+      "status": "historical_verified",
+      "stage": "historical_verified",
+      "role": "external holdout",
+      "mechanism": "Wasm JSPI object selection",
+      "history": "verified",
+      "mapping": "surface retired",
+      "generator": "비적용",
+      "comparison": "CVE campaign 비적용",
+      "source_role": "**external holdout**(Wasm JSPI 객체 선택)"
+    },
+    {
+      "id": "CVE-2024-3833",
+      "status": "historical_verified",
+      "stage": "historical_verified",
+      "role": "external holdout",
+      "mechanism": "Wasm type-reflection collision",
+      "history": "verified",
+      "mapping": "surface retired",
+      "generator": "비적용",
+      "comparison": "3832 sibling cluster",
+      "source_role": "**external holdout**(Wasm type-reflection 충돌)"
+    },
+    {
+      "id": "CVE-2022-1096",
+      "status": "linked / deferred",
+      "stage": "deferred",
+      "role": "external holdout",
+      "mechanism": "Blink interceptor boundary",
+      "history": "차등 없음",
+      "mapping": "Blink lane 필요",
+      "generator": "보류",
+      "comparison": "Blink replay 확보 전 보류",
+      "source_role": "**external holdout**(Blink interceptor 경계)"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2026-10-20",
+      "revision": "282bcb7",
+      "title": "재현 가능한 연구 기반 구축",
+      "detail": "V8·Fuzzilli 실행 환경과 증거 레코드 구조를 초기화했습니다.",
+      "category": "foundation"
+    },
+    {
+      "date": "2026-10-20",
+      "revision": "a58628f",
+      "title": "첫 paired B2 적응 효과",
+      "detail": "공유 corpus와 다음-window weight 적용을 연결해 목표 generator 증가를 확인했습니다.",
+      "category": "adaptation"
+    },
+    {
+      "date": "2026-10-21",
+      "revision": "d799e0f",
+      "title": "4-generator 장기 비교",
+      "detail": "여러 CVE-derived generator를 포함한 B0/B1/B2 장기 비교를 완료했습니다.",
+      "category": "comparison"
+    },
+    {
+      "date": "2026-10-23",
+      "revision": "02d70d8",
+      "title": "Policy v3 · 1→100 적용",
+      "detail": "희박한 generator 호출을 줄이는 고가중치 adaptation을 검증했습니다.",
+      "category": "adaptation"
+    },
+    {
+      "date": "2026-10-25",
+      "revision": "658d5bf",
+      "title": "v7 신호의 미러 검증",
+      "detail": "방향을 뒤집은 v8에서 일반 퍼징 우월성이 재현되지 않아 최종 주장을 축소했습니다.",
+      "category": "verdict"
+    },
+    {
+      "date": "2026-10-28",
+      "revision": "3d3d9d1",
+      "title": "교차 계열 반복",
+      "detail": "Wasm GC와 Maglev 계열에서 target 적응과 일반 지표를 분리해 평가했습니다.",
+      "category": "comparison"
+    },
+    {
+      "date": "2026-10-29",
+      "revision": "456c8f1",
+      "title": "개발·external 비교 확장",
+      "detail": "Wasm JSPI와 JSON exception-path 캠페인을 완료했습니다.",
+      "category": "comparison"
+    },
+    {
+      "date": "2026-10-30",
+      "revision": "54bac72",
+      "title": "Array species external holdout",
+      "detail": "동결된 정책으로 세 paired repetition을 완료했습니다.",
+      "category": "holdout"
+    },
+    {
+      "date": "2026-10-30",
+      "revision": "87381e6",
+      "title": "Super IC external holdout",
+      "detail": "세 번째 external holdout과 포트폴리오 primary evidence를 완성했습니다.",
+      "category": "holdout"
+    },
+    {
+      "date": "2026-10-31",
+      "revision": "46ba5a9",
+      "title": "CVE-2023-2033 역사 경계 검증",
+      "detail": "Error stack/global proxy의 parent/fix 구조 차등을 3/3로 확인했습니다.",
+      "category": "cve"
+    },
+    {
+      "date": "2026-10-31",
+      "revision": "4e867e9",
+      "title": "CVE-2023-2033 generator smoke",
+      "detail": "500-iteration smoke에서 target hit과 27/27 변형 조합을 확인했습니다.",
+      "category": "cve"
+    },
+    {
+      "date": "2026-10-31",
+      "revision": "87a31f2",
+      "title": "CVE-2023-2033 비교 동결",
+      "detail": "Development B0/B1/B2 v1의 schedule·eligibility·runner를 동결했습니다.",
+      "category": "cve"
+    },
+    {
+      "date": "2026-10-31",
+      "revision": "d889568",
+      "title": "포트폴리오 최종 판정 v2",
+      "detail": "9/9 target 효과와 일반 효과 0/3을 최종 주장으로 동결했습니다.",
+      "category": "verdict"
+    }
   ]
 }

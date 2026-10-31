@@ -15,6 +15,10 @@ LAB_REVISION = DATA["lab_revision"]
 UPDATED = DATA["updated_display"]
 METRICS = DATA["metrics"]
 COMPARISONS = DATA["comparison_campaigns"]
+COMPARISON_BY_ID = {item["id"]: item for item in COMPARISONS}
+CASE_BY_ID = {item["id"]: item for item in DATA["cve_cases"]}
+TIMELINE = DATA.get("timeline", [])
+LATEST_CASE = CASE_BY_ID["CVE-2023-2033"]
 
 
 def e(value: object) -> str:
@@ -31,6 +35,7 @@ def page(title: str, filename: str, active: str, body: str, description: str) ->
         ("architecture.html", "연구 설계"),
         ("performance.html", "실험 결과"),
         ("reports.html", "CVE 기록"),
+        ("timeline.html", "연구 이력"),
     ]
     links = "".join(
         f'<a href="{href}"{current}>{label}</a>'
@@ -86,7 +91,7 @@ holdout_rows = "".join(
 
 cve_rows = "".join(
     "<tr>"
-    f"<td><strong>{e(item['id'])}</strong></td>"
+    f"<td><a class=\"case-link\" href=\"{e(item['id'].lower())}.html\"><strong>{e(item['id'])}</strong><span>상세 →</span></a></td>"
     f"<td>{e(item['mechanism'])}</td>"
     f"<td>{e(item['role'])}</td>"
     f"<td>{e(item['history'])}</td>"
@@ -143,6 +148,50 @@ stage_legend = "".join(
     for key, label in stage_order
 )
 
+GENERAL_METRICS = (
+    ("interesting", "유의미 샘플", "개", 0),
+    ("corpus", "말뭉치 성장", "개", 0),
+    ("coverage_pp", "커버리지", "%p", 2),
+)
+
+
+def format_signed(value: float, digits: int, unit: str) -> str:
+    number = f"{value:+.{digits}f}" if digits else f"{value:+.0f}"
+    return f"{number}{unit}"
+
+
+general_metric_panels = ""
+for key, label, unit, digits in GENERAL_METRICS:
+    values = [float(item["general_metrics"][key]) for item in COMPARISONS]
+    maximum = max(abs(value) for value in values) or 1
+    rows = ""
+    for item, value in zip(COMPARISONS, values):
+        direction = "positive" if value >= 0 else "negative"
+        size = abs(value) / maximum * 50
+        formatted = format_signed(value, digits, unit)
+        rows += (
+            '<div class="metric-row">'
+            f'<span>{e(item["id"].replace("CVE-", ""))}</span>'
+            f'<i class="diverging-track" role="img" aria-label="{e(item["id"])} {e(label)} B2 빼기 B1 {e(formatted)}">'
+            f'<b class="{direction}" style="--size:{size:.2f}%"></b></i>'
+            f'<strong>{e(formatted)}</strong></div>'
+        )
+    general_metric_panels += (
+        '<article class="metric-panel">'
+        f'<h3>{e(label)} <small>B2−B1 · {e(unit)}</small></h3>{rows}'
+        '<div class="diverging-axis" aria-hidden="true"><span>−</span><i></i><span>+</span></div>'
+        '</article>'
+    )
+
+timeline_rows = "".join(
+    '<article class="timeline-entry">'
+    f'<div><time datetime="{e(item["date"])}">{e(item["date"].replace("-", "."))}</time><code>{e(item["revision"])}</code></div>'
+    f'<span class="timeline-dot category-{e(item["category"])}"></span>'
+    f'<div><h3>{e(item["title"])}</h3><p>{e(item["detail"])}</p></div>'
+    '</article>'
+    for item in TIMELINE
+)
+
 confirmatory_cards = "".join(
     "<article>"
     f"<div class=\"case-head\"><span>{e(item['mechanism']).upper()}</span><b>MIGRATED</b></div>"
@@ -174,6 +223,7 @@ performance = f'''
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">EXTERNAL HOLDOUT / FINAL</span><h2>선택한 target 도달은 반복적으로 증가했습니다</h2></div><p>정책을 holdout 결과에 맞춰 다시 조정하지 않고, 동일한 neutral corpus 기반 9-arm 설계를 세 메커니즘 계열에 적용했습니다.</p></div><div class="stat-grid"><article><span>Holdout campaign</span><strong>{METRICS['external_holdout_campaigns']}</strong><small>서로 다른 CVE 계열</small></article><article><span>Paired repetition</span><strong>{METRICS['external_holdout_positive_pairs']}/{METRICS['external_holdout_total_pairs']}</strong><small>B2−B1 target hit 양수</small></article><article><span>Pooled 중앙값</span><strong>+{METRICS['pooled_target_hit_median']}</strong><small>target-hit delta</small></article><article><span>일반 효과 지지</span><strong>{METRICS['general_effect_supported_campaigns']}/{METRICS['external_holdout_campaigns']}</strong><small>coverage·corpus·interesting</small></article></div><div class="result-callout"><span>최종 판정 / TARGET ADAPTATION SUPPORTED · GENERAL SUPERIORITY UNSUPPORTED</span><h3>Codex-guided B2는 선택한 generator에 실행 노력을 재배분했습니다.</h3><p>세 external holdout의 {METRICS['external_holdout_total_pairs']}개 pair가 모두 양수였고 누적 target-hit delta는 +{METRICS['pooled_target_hit_sum']}입니다. 그러나 세 primary campaign 모두 일반 coverage·corpus·interesting sample의 방향 독립적 개선을 지지하지 않았고, 독립 검증 신규 버그도 {METRICS['verified_new_bugs']}건입니다.</p></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">PAIRED RESULTS</span><h2>External-holdout target 효과</h2></div><p>각 셀은 같은 반복에서의 B2−B1 완전 구조 hit 차이입니다. 일반 퍼징 지표와 분리해 읽어야 합니다.</p></div><div class="result-table-wrap" tabindex="0" aria-label="External holdout 결과표, 작은 화면에서는 가로로 스크롤"><table class="vmx"><thead><tr><th>CVE / 메커니즘</th><th>paired delta</th><th>중앙값</th><th>일반 효과</th></tr></thead><tbody>{holdout_rows}</tbody></table></div></section>
 <section class="section section-ink" id="all-paired-campaigns"><div class="wrap"><div class="section-top"><div><span class="eyebrow">ALL COMPLETED PAIRED CAMPAIGNS</span><h2>완료된 CVE 비교 전체</h2></div><p>개발·holdout·external holdout을 한 화면에 표시하되 증거 역할은 합치지 않습니다. 막대는 각 반복의 B2−B1 target-hit 차이이며 최댓값 +{chart_max}을 공통 축으로 사용합니다.</p></div><div class="comparison-chart" aria-label="완료된 여섯 CVE paired campaign의 B2 빼기 B1 target hit 그래프">{comparison_chart}<div class="chart-axis" aria-hidden="true"><span>0</span><span>+{chart_max // 2}</span><span>+{chart_max}</span></div></div><div class="result-table-wrap" tabindex="0" aria-label="완료된 paired campaign 전체 표"><table class="cvenum comparison-table"><thead><tr><th>CVE / 메커니즘</th><th>증거 역할</th><th>paired delta</th><th>중앙값</th><th>일반 효과</th></tr></thead><tbody>{comparison_rows}</tbody></table></div></div></section>
+<section class="section wrap" id="general-metrics"><div class="section-top"><div><span class="eyebrow">GENERAL FUZZING METRICS</span><h2>Target 증가와 일반 성능은 다릅니다</h2></div><p>각 패널은 campaign별 B2−B1 중앙값입니다. 중앙선 오른쪽은 증가, 왼쪽은 감소입니다. 서로 단위가 달라 패널 간 막대 길이는 비교하지 않습니다.</p></div><div class="general-metric-grid">{general_metric_panels}</div><div class="result-callout compact-callout"><span>해석</span><h3>Target hit은 18/18 pair에서 증가했지만 일반 지표의 방향은 섞였습니다.</h3><p>Development CVE-2024-5838은 세 일반 지표가 양수였지만, 동결된 external holdout 세 캠페인은 coverage·corpus·interesting의 일관된 동시 개선을 재현하지 못했습니다. 따라서 일반 퍼저 우월성은 계속 미지지입니다.</p></div></section>
 <section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">COST & SAFETY</span><h2>효과와 비용을 함께 기록합니다</h2></div></div><div class="stat-grid"><article><span>Codex 호출</span><strong>{METRICS['codex_calls']}</strong><small>external holdout 3건</small></article><article><span>총 tokens</span><strong>{METRICS['codex_tokens']:,}</strong><small>input + output</small></article><article><span>1k tokens당 delta</span><strong>{METRICS['target_delta_per_1k_tokens']}</strong><small>누적 target hit 기준</small></article><article><span>Crash / failure</span><strong>0 / 0</strong><small>primary holdout</small></article></div></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">QUICKSTART ACCEPTANCE</span><h2>실제 2024 smoke 경로도 검증했습니다</h2></div><p>후보 수집 → lineage gate → candidate-pinned runtime → Fuzzilli smoke → run/finding/report 생성을 한 명령으로 완료했습니다.</p></div><div class="result-table-wrap"><table class="result-table"><thead><tr><th>후보</th><th>규모</th><th>결과</th><th>판정</th></tr></thead><tbody><tr><td><strong>CVE-2024-5838</strong><small>WasmImportWrapperJSPIGenerator</small></td><td>500 samples<br>16,235 executions</td><td>valid 474 · interesting 304 · coverage 4.47% · crash 0</td><td><span class="pill">통합 수용 통과</span></td></tr></tbody></table></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">INTERPRETATION</span><h2>이 수치가 말하지 않는 것</h2></div></div><div class="note-grid"><article><h3>Target hit ≠ 취약점</h3><p>목표 구조를 생성하거나 현재 빌드에서 실행했다는 관찰은 새 버그 발견이 아닙니다.</p></article><article><h3>0 crash ≠ 안전성</h3><p>관찰된 예산에서 crash가 없었다는 뜻입니다. finding은 생성되지 않았습니다.</p></article><article><h3>Coverage ≠ 적응 효과</h3><p>Fuzzilli 내부 entropy와 희박한 generator 호출 때문에 작은 차이를 Agent의 인과 효과로 해석할 수 없습니다.</p></article></div></section>
@@ -208,6 +258,36 @@ research_verdict = f'''
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">INTERPRETATION</span><h2>통계와 독립성 한계</h2></div></div><p class="lede">9/9 양수의 exact sign 통계는 공유 인프라와 정책 때문에 완전 독립 표본으로 보지 않습니다. 방향 일관성을 보여주는 탐색적 기술통계로만 사용하며, 포트폴리오 확증에는 추가 독립 환경과 더 많은 CVE 계열이 필요합니다.</p><div class="actions"><a class="button secondary" href="portfolio.html">포트폴리오 보고서 보기 <span>→</span></a><a class="button secondary" href="reports.html">전체 CVE case 보기 <span>→</span></a></div></section>
 '''
 
+timeline = f'''
+<section class="page-hero wrap"><span class="eyebrow">RESEARCH HISTORY / 04</span><h1>설계가 바뀐<br><em>근거의 시간축.</em></h1><p>초기 실행 기반부터 policy v3, 방향 대칭 검증, external holdout과 최신 CVE 온보딩까지 주요 의사결정을 커밋 근거와 함께 표시합니다.</p></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">MILESTONES</span><h2>주요 실험·판정 이력</h2></div><p>실패·null·미재현도 다음 설계를 바꾼 근거로 포함합니다. 날짜는 연구 저장소 커밋 기준입니다.</p></div><div class="research-timeline">{timeline_rows}</div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">CURRENT FRONTIER</span><h2>지금 이어지는 작업</h2></div></div><div class="result-callout"><span>{e(LATEST_CASE['id'])}</span><h3>{e(LATEST_CASE['comparison'])}</h3><p>완료된 outcome이 생성되기 전에는 paired campaign 그래프나 일반 효과 판정에 포함하지 않습니다. 동기화 스크립트가 새 결과 보고서를 발견하면 다음 사이트 생성에서 자동 반영합니다.</p></div></div></section>
+'''
+
+
+def case_detail(case: dict[str, object]) -> str:
+    comparison = COMPARISON_BY_ID.get(case["id"])
+    if comparison:
+        maximum = max(comparison["deltas"]) or 1
+        repeat_rows = "".join(
+            f'<div><span>R{index}</span><i><b style="width:{value / maximum * 100:.2f}%"></b></i><strong>+{value}</strong></div>'
+            for index, value in enumerate(comparison["deltas"], start=1)
+        )
+        metrics = comparison["general_metrics"]
+        comparison_block = f'''
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">PAIRED OUTCOME</span><h2>B2−B1 target hit</h2></div><p>{e(comparison['role'])} · {e(comparison['report'])}</p></div><div class="case-repeat-chart" role="img" aria-label="{e(case['id'])} B2 빼기 B1 target hit {e(delta_list(comparison['deltas']))}">{repeat_rows}</div><div class="stat-grid"><article><span>중앙 target delta</span><strong>+{e(comparison['median'])}</strong><small>{e(delta_list(comparison['deltas']))}</small></article><article><span>Interesting 중앙값</span><strong>{e(format_signed(metrics['interesting'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Corpus 중앙값</span><strong>{e(format_signed(metrics['corpus'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Coverage 중앙값</span><strong>{e(format_signed(metrics['coverage_pp'], 2, '%p'))}</strong><small>B2−B1</small></article></div></div></section>
+'''
+    else:
+        comparison_block = f'''
+<section class="section section-ink"><div class="wrap"><div class="result-callout"><span>PAIRED OUTCOME</span><h3>{e(case['comparison'])}</h3><p>아직 완료된 paired outcome이 없거나 현재 surface·실행 전제 때문에 CVE campaign이 비적용·보류 상태입니다.</p></div></div></section>
+'''
+    return f'''
+<section class="page-hero wrap"><span class="eyebrow">CVE CASE / {e(case['status']).upper()}</span><h1>{e(case['id'])}<br><em>{e(case['mechanism'])}.</em></h1><p>{e(case['role'])} 증거 집단의 case입니다. 각 단계의 완료·미실행·비적용 상태를 분리해 표시합니다.</p><div class="actions"><a class="button secondary" href="reports.html">전체 CVE로 돌아가기 <span>←</span></a><a class="button secondary" href="performance.html#all-paired-campaigns">비교 그래프 보기 <span>→</span></a></div></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">EVIDENCE GATES</span><h2>현재 증거 상태</h2></div></div><div class="evidence-grid"><article><span>01 · 역사 재현</span><h3>{e(case['history'])}</h3><p>공개 입력 또는 제한된 authored oracle로 parent/fix 경계를 평가한 상태입니다.</p></article><article><span>02 · Current mapping</span><h3>{e(case['mapping'])}</h3><p>현재 V8에 남은 불변식·표면과 실행 도달 여부입니다.</p></article><article><span>03 · Generator</span><h3>{e(case['generator'])}</h3><p>Fuzzilli 전략의 방출·유효 실행·구조 hit 검증 상태입니다.</p></article><article><span>04 · 비교 / 처분</span><h3>{e(case['comparison'])}</h3><p>완료된 B0/B1/B2 outcome 또는 비적용·보류 근거입니다.</p></article></div></section>
+{comparison_block}
+<section class="source-note wrap"><strong>Provenance</strong><p>근거 기준 <code>{LAB_REVISION[:12]}</code>. 원본 분석은 권한 보유자가 <a href="https://github.com/llmvf/v8-fuzz-lab/tree/main/cve/{e(case['id'])}">{e(case['id'])} 연구 폴더</a>에서 확인할 수 있습니다. Target hit과 smoke는 live vulnerability 또는 신규 버그 주장이 아닙니다.</p></section>
+'''
+
 pages = {
     "index.html": ("개요", "index.html", home, "V8 과거 CVE를 역사적으로 재현하고 현재 Fuzzilli 퍼징 전략으로 이식하는 연구 프로젝트."),
     "architecture.html": ("연구 설계", "architecture.html", architecture, "V8 Fuzz Lab의 제어면 구조도, CVE 증거 계보, 검증 기준과 external-holdout 전이."),
@@ -215,7 +295,17 @@ pages = {
     "reports.html": ("CVE 기록", "reports.html", reports, "V8 역사적 CVE 재현, external-holdout 결과와 포트폴리오 최종 판정."),
     "portfolio.html": ("포트폴리오 최종 보고서", "reports.html", portfolio, "External holdout과 비적용·보류 사례를 포함한 V8 역사-CVE 퍼징 포트폴리오 최종 보고서."),
     "research-verdict.html": ("연구질문 최종 판정", "reports.html", research_verdict, "Codex-guided B2의 target reachability 효과와 일반 퍼징 효과의 주장 경계."),
+    "timeline.html": ("연구 이력", "timeline.html", timeline, "V8 Fuzz Lab의 주요 실험, 설계 변경, holdout과 최종 판정의 시간축."),
 }
+
+for case in DATA["cve_cases"]:
+    filename = f"{case['id'].lower()}.html"
+    pages[filename] = (
+        str(case["id"]),
+        "reports.html",
+        case_detail(case),
+        f"{case['id']} {case['mechanism']}의 역사 재현, current mapping, generator와 비교 상태.",
+    )
 
 for filename, (title, active, body, description) in pages.items():
     (ROOT / filename).write_text(page(title, filename, active, body, description), encoding="utf-8")
@@ -267,14 +357,14 @@ Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current 
 ## Content baseline
 
 - Lab revision: `{LAB_REVISION}` ({DATA['updated']})
-- Curated public metrics and case rows: `site-summary.json`
+- Public metrics and case rows: `site-summary.json` (revision, completed comparison values, general metrics, tokens, and timeline are refreshed by `sync_from_lab.py`)
 - Core sources: lab `README.md`, `architecture/workflow.md`, `architecture/integration.md`, `experiments/protocol.md`, and the named files in `experiments/results/`.
 - Experiment totals are kept per campaign. A historical replay, generator smoke, target hit, or coverage observation must not be presented as a new vulnerability finding.
 - The lab repository and raw artifacts may be private. This site publishes curated summaries only.
 
 ## Updating
 
-Edit `site-summary.json`, `build_site.py`, `architecture_content.html`, and the CSS sources, then run `py -3 build_site.py`. When a local lab checkout is available, run `py -3 validate_site.py --lab-root <path-to-v8-fuzz-lab>` so a stale revision or missing CVE case fails before publication. Commit the generated HTML, CSS, JavaScript, sitemap, robots file, and images with the source changes. GitHub Pages serves the repository root without a build dependency.
+Update editorial case labels when a new CVE appears, then run `py -3 sync_from_lab.py --lab-root <path-to-v8-fuzz-lab>`, `py -3 build_site.py`, and `py -3 validate_site.py --lab-root <path-to-v8-fuzz-lab>`. The sync step discovers completed non-aborted `CVE-*-b012-*.md` reports and extracts target deltas, general metrics, tokens, generator count, revision, and milestone dates. Validation fails on stale revisions, missing CVEs, or mismatched report values. Commit the generated HTML, CSS, JavaScript, sitemap, robots file, and images with the source changes. GitHub Pages serves the repository root without a build dependency.
 
 The old `/llm_variant_fuzz_agent/` route redirects to the new results page for existing links.
 ''', encoding="utf-8")

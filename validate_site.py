@@ -11,15 +11,18 @@ ROOT = Path(__file__).parent
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--lab-root", type=Path, help="optional local v8-fuzz-lab checkout")
 ARGS = PARSER.parse_args()
-PAGES = (
+DATA = json.loads((ROOT / "site-summary.json").read_text(encoding="utf-8"))
+CORE_PAGES = (
     "index.html",
     "architecture.html",
     "performance.html",
     "reports.html",
     "portfolio.html",
     "research-verdict.html",
+    "timeline.html",
 )
-DATA = json.loads((ROOT / "site-summary.json").read_text(encoding="utf-8"))
+CASE_PAGES = tuple(f"{item['id'].lower()}.html" for item in DATA["cve_cases"])
+PAGES = CORE_PAGES + CASE_PAGES
 assert DATA["metrics"]["cve_cases"] == len(DATA["cve_cases"])
 assert DATA["metrics"]["completed_paired_campaigns"] == len(DATA["comparison_campaigns"])
 assert DATA["metrics"]["completed_paired_repetitions"] == sum(
@@ -85,6 +88,10 @@ for marker in ("EXTERNAL HOLDOUT / FINAL", "9/9", "CVE-2021-38003", "CVE-2021-21
 for campaign in DATA["comparison_campaigns"]:
     assert campaign["id"] in performance, campaign["id"]
 assert performance.count('class="comparison-chart-row"') == len(DATA["comparison_campaigns"])
+assert performance.count('class="metric-panel"') == 3
+for campaign in DATA["comparison_campaigns"]:
+    for value in campaign["general_metrics"].values():
+        assert str(value) in performance
 assert "CVE-2024-0519" in (ROOT / "reports.html").read_text(encoding="utf-8")
 assert "포트폴리오 최종 보고서 v2" in (ROOT / "reports.html").read_text(encoding="utf-8")
 reports = (ROOT / "reports.html").read_text(encoding="utf-8")
@@ -93,6 +100,13 @@ for case in DATA["cve_cases"]:
 assert str(DATA["metrics"]["cve_cases"]) in reports
 assert "CVE-2023-2033" in reports and "3/3 구조 차등" in reports
 assert 'class="stage-chart"' in reports
+for case in DATA["cve_cases"]:
+    detail = (ROOT / f"{case['id'].lower()}.html").read_text(encoding="utf-8")
+    for key in ("id", "mechanism", "history", "mapping", "generator", "comparison"):
+        assert str(case[key]) in detail, (case["id"], key)
+timeline = (ROOT / "timeline.html").read_text(encoding="utf-8")
+assert timeline.count('class="timeline-entry"') == len(DATA["timeline"])
+assert len(DATA["timeline"]) >= 10
 assert "portfolio.html" in reports and "research-verdict.html" in reports
 architecture = (ROOT / "architecture.html").read_text(encoding="utf-8")
 for anchor in ("system-map", "lineage", "control-loop", "validation"):

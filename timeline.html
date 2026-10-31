@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="V8 Fuzz Lab의 주요 실험, 설계 변경, holdout과 최종 판정의 시간축.">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#101820">
+  <meta property="og:title" content="연구 이력 · V8 Fuzz Lab">
+  <meta property="og:description" content="V8 Fuzz Lab의 주요 실험, 설계 변경, holdout과 최종 판정의 시간축.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="V8 Fuzz Lab">
+  <meta property="og:url" content="https://llmvf.github.io/timeline.html">
+  <meta property="og:image" content="https://llmvf.github.io/social-card.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>연구 이력 · V8 Fuzz Lab</title>
+  <link rel="canonical" href="https://llmvf.github.io/timeline.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="refinements.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 이동</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="V8 Fuzz Lab 홈"><span class="brand-icon">V8<span> / </span></span><span>FUZZ LAB<small>LLMVF RESEARCH</small></span></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">메뉴 <span aria-hidden="true">☰</span></button>
+    <nav id="site-nav" aria-label="주요 메뉴"><a href="index.html">개요</a><a href="architecture.html">연구 설계</a><a href="performance.html">실험 결과</a><a href="reports.html">CVE 기록</a><a href="timeline.html" aria-current="page">연구 이력</a></nav>
+  </header>
+  <main id="main">
+<section class="page-hero wrap"><span class="eyebrow">RESEARCH HISTORY / 04</span><h1>설계가 바뀐<br><em>근거의 시간축.</em></h1><p>초기 실행 기반부터 policy v3, 방향 대칭 검증, external holdout과 최신 CVE 온보딩까지 주요 의사결정을 커밋 근거와 함께 표시합니다.</p></section>
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">MILESTONES</span><h2>주요 실험·판정 이력</h2></div><p>실패·null·미재현도 다음 설계를 바꾼 근거로 포함합니다. 날짜는 연구 저장소 커밋 기준입니다.</p></div><div class="research-timeline"><article class="timeline-entry"><div><time datetime="2026-10-20">2026.10.20</time><code>282bcb7</code></div><span class="timeline-dot category-foundation"></span><div><h3>재현 가능한 연구 기반 구축</h3><p>V8·Fuzzilli 실행 환경과 증거 레코드 구조를 초기화했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-20">2026.10.20</time><code>a58628f</code></div><span class="timeline-dot category-adaptation"></span><div><h3>첫 paired B2 적응 효과</h3><p>공유 corpus와 다음-window weight 적용을 연결해 목표 generator 증가를 확인했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-21">2026.10.21</time><code>d799e0f</code></div><span class="timeline-dot category-comparison"></span><div><h3>4-generator 장기 비교</h3><p>여러 CVE-derived generator를 포함한 B0/B1/B2 장기 비교를 완료했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-23">2026.10.23</time><code>02d70d8</code></div><span class="timeline-dot category-adaptation"></span><div><h3>Policy v3 · 1→100 적용</h3><p>희박한 generator 호출을 줄이는 고가중치 adaptation을 검증했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-25">2026.10.25</time><code>658d5bf</code></div><span class="timeline-dot category-verdict"></span><div><h3>v7 신호의 미러 검증</h3><p>방향을 뒤집은 v8에서 일반 퍼징 우월성이 재현되지 않아 최종 주장을 축소했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-28">2026.10.28</time><code>3d3d9d1</code></div><span class="timeline-dot category-comparison"></span><div><h3>교차 계열 반복</h3><p>Wasm GC와 Maglev 계열에서 target 적응과 일반 지표를 분리해 평가했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-29">2026.10.29</time><code>456c8f1</code></div><span class="timeline-dot category-comparison"></span><div><h3>개발·external 비교 확장</h3><p>Wasm JSPI와 JSON exception-path 캠페인을 완료했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-30">2026.10.30</time><code>54bac72</code></div><span class="timeline-dot category-holdout"></span><div><h3>Array species external holdout</h3><p>동결된 정책으로 세 paired repetition을 완료했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-30">2026.10.30</time><code>87381e6</code></div><span class="timeline-dot category-holdout"></span><div><h3>Super IC external holdout</h3><p>세 번째 external holdout과 포트폴리오 primary evidence를 완성했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-31">2026.10.31</time><code>46ba5a9</code></div><span class="timeline-dot category-cve"></span><div><h3>CVE-2023-2033 역사 경계 검증</h3><p>Error stack/global proxy의 parent/fix 구조 차등을 3/3로 확인했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-31">2026.10.31</time><code>4e867e9</code></div><span class="timeline-dot category-cve"></span><div><h3>CVE-2023-2033 generator smoke</h3><p>500-iteration smoke에서 target hit과 27/27 변형 조합을 확인했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-31">2026.10.31</time><code>87a31f2</code></div><span class="timeline-dot category-cve"></span><div><h3>CVE-2023-2033 비교 동결</h3><p>Development B0/B1/B2 v1의 schedule·eligibility·runner를 동결했습니다.</p></div></article><article class="timeline-entry"><div><time datetime="2026-10-31">2026.10.31</time><code>d889568</code></div><span class="timeline-dot category-verdict"></span><div><h3>포트폴리오 최종 판정 v2</h3><p>9/9 target 효과와 일반 효과 0/3을 최종 주장으로 동결했습니다.</p></div></article></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">CURRENT FRONTIER</span><h2>지금 이어지는 작업</h2></div></div><div class="result-callout"><span>CVE-2023-2033</span><h3>B0/B1/B2 v1 동결 · 실행 대기</h3><p>완료된 outcome이 생성되기 전에는 paired campaign 그래프나 일반 효과 판정에 포함하지 않습니다. 동기화 스크립트가 새 결과 보고서를 발견하면 다음 사이트 생성에서 자동 반영합니다.</p></div></div></section>
+</main>
+  <footer class="footer"><div><strong>V8 FUZZ LAB</strong><p>Historical CVE evidence → current V8 experiments.</p></div><div><span>근거 기준: v8-fuzz-lab <code>87a31f2eaa10</code></span><span>최종 반영 2026.10.31</span></div></footer>
+</body>
+</html>
