@@ -112,6 +112,8 @@ for case in DATA["cve_cases"]:
 assert str(DATA["metrics"]["cve_cases"]) in reports
 assert "CVE-2023-2033" in reports and "3/3 구조 차등" in reports
 assert 'class="stage-chart"' in reports
+assert reports.count('class="case-overview-card"') == len(DATA["cve_cases"])
+assert "각 CVE의 그래프와 연구질문 해석" in reports
 for case in DATA["cve_cases"]:
     detail = (ROOT / f"{case['id'].lower()}.html").read_text(encoding="utf-8")
     for key in ("id", "mechanism", "history", "mapping", "generator", "comparison"):

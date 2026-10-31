@@ -120,7 +120,7 @@ holdout_rows = "".join(
 
 cve_rows = "".join(
     "<tr>"
-    f"<td><a class=\"case-link\" href=\"{e(item['id'].lower())}.html\"><strong>{e(item['id'])}</strong><span>상세 →</span></a></td>"
+    f"<td><a class=\"case-link\" href=\"{e(item['id'].lower())}.html\"><strong>{e(item['id'])}</strong><span>그래프·RQ 해석 →</span></a></td>"
     f"<td>{e(item['mechanism'])}</td>"
     f"<td>{e(item['role'])}</td>"
     f"<td>{e(item['history'])}</td>"
@@ -128,6 +128,20 @@ cve_rows = "".join(
     f"<td>{e(item['generator'])}</td>"
     f"<td>{e(item['comparison'])}</td>"
     "</tr>"
+    for item in DATA["cve_cases"]
+)
+
+case_overview_cards = "".join(
+    '<article class="case-overview-card">'
+    f'<div><span>{e(item["role"])}</span><b>{e(item["status"])}</b></div>'
+    f'<h3>{e(item["id"])}</h3><p>{e(item["mechanism"])}</p>'
+    + (
+        f'<dl><div><dt>RQ2 목표 재배분</dt><dd class="supported">지원 · +{e(COMPARISON_BY_ID[item["id"]]["median"])}</dd></div>'
+        f'<div><dt>RQ3 일반 효과</dt><dd>{e("탐색적 양성" if COMPARISON_BY_ID[item["id"]]["general_effect"] == "지원" and "development" in str(COMPARISON_BY_ID[item["id"]]["role"]).lower() else COMPARISON_BY_ID[item["id"]]["general_effect"])}</dd></div></dl>'
+        if item["id"] in COMPARISON_BY_ID
+        else f'<dl><div><dt>RQ2·RQ3</dt><dd>{e(no_outcome_status(item))} / 미평가</dd></div></dl>'
+    )
+    + f'<a href="{e(item["id"].lower())}.html">수치 그래프와 RQ1~RQ4 보기 <span>→</span></a></article>'
     for item in DATA["cve_cases"]
 )
 
@@ -263,6 +277,7 @@ reports = f'''
 <section class="page-hero wrap"><span class="eyebrow">CASE FILES / 03</span><h1>CVE별 증거와<br><em>현재 상태.</em></h1><p>역사적 parent/fix 차이와 현재 V8용 전략의 상태를 구분합니다. 아래는 CVE 연구 기록이며 새 취약점 보고서 목록이 아닙니다.</p></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">PUBLIC REPORTS</span><h2>권한 없이 읽을 수 있는 최종 판정</h2></div><p>핵심 보고서는 이 공개 사이트 안에서 제공합니다. 비공개 연구 저장소 링크는 provenance 확인이 필요한 권한 보유자를 위한 보조 링크입니다.</p></div><div class="report-links"><a class="primary" href="portfolio.html"><span class="ext">→</span><strong>포트폴리오 최종 보고서 v2</strong><small>External holdout, 비적용·보류 사례, 최종 주장 경계</small></a><a class="primary" href="research-verdict.html"><span class="ext">→</span><strong>연구질문 최종 판정 v2</strong><small>9/9 paired target 효과와 일반 효과 0/3</small></a></div></section>
 <section class="section wrap" id="portfolio-progress"><div class="section-top"><div><span class="eyebrow">PORTFOLIO PROGRESS</span><h2>{METRICS['cve_cases']}개 CVE case의 현재 단계</h2></div><p>온보딩은 실행 완료를 뜻하지 않습니다. migrated, 역사 검증만 완료, 연결·보류, 제외를 분리해 표시합니다.</p></div><div class="stage-chart" role="img" aria-label="{e(stage_summary)}">{stage_chart}</div><ul class="stage-legend">{stage_legend}</ul><div class="result-callout compact-callout"><span>LATEST CASE / CVE-2023-2033</span><h3>Error stack/global proxy generator smoke와 캠페인 동결까지 완료했습니다.</h3><p>역사적 구조 차등 3/3, current mapping verified, 500-iteration smoke target hit 172와 27/27 변형 조합을 확인했습니다. Development B0/B1/B2 v1은 동결됐으며 실제 실행·집계는 다음 단계입니다.</p></div></section>
+<section class="section wrap" id="case-interpretations"><div class="section-top"><div><span class="eyebrow">CVE METRICS & RQ INDEX</span><h2>각 CVE의 그래프와 연구질문 해석</h2></div><p>완료 case는 RQ2 target 효과와 RQ3 일반 효과를 바로 표시합니다. 카드를 선택하면 smoke, B0/B1/B2 그래프와 RQ1~RQ4 전체 해석으로 이동합니다.</p></div><div class="case-overview-grid">{case_overview_cards}</div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">CONFIRMATORY CASES</span><h2>External holdout 세 계열</h2></div><p>역사 재현, current mapping, bounded generator, 동일 설계 B0/B1/B2 비교까지 연결된 사례입니다.</p></div><div class="case-grid">{confirmatory_cards}</div></section>
 <section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">ALL CASES</span><h2>온보딩된 CVE case {METRICS['cve_cases']}건</h2></div><p>각 case의 역사 재현, current mapping, generator, paired 비교 단계를 별도로 표시합니다. 같은 sibling cluster도 CVE ID별 case로 세며, 이 수는 서로 독립적인 취약점 계열 수를 뜻하지 않습니다.</p></div><div class="result-table-wrap" tabindex="0" aria-label="전체 CVE case 단계별 표, 작은 화면에서는 가로로 스크롤"><table class="cvenum public-cve-table"><thead><tr><th>CVE</th><th>메커니즘</th><th>증거 역할</th><th>역사 재현</th><th>Current mapping</th><th>Generator</th><th>비교 / 처분</th></tr></thead><tbody>{cve_rows}</tbody></table></div></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">STATUS CONTRACT</span><h2>상태를 읽는 법</h2></div></div><div class="status-line"><span>candidate</span><i>→</i><span>linked</span><i>→</i><span>historical_verified</span><i>→</i><span>migrated</span><i>→</i><span>approved</span></div><p class="status-explain">실행 중 관찰한 crash는 별도 candidate입니다. 최소화, 중복 검토, 독립 재현과 사람 검토를 마치기 전에는 검증된 bug 수에 넣지 않습니다.</p></section>
