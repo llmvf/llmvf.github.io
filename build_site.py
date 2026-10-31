@@ -7,11 +7,17 @@ This script keeps the shared layout consistent across GitHub Pages entry points.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).parent
+ASSET_REVISION = hashlib.sha256(
+    (ROOT / "site_styles_new.css").read_bytes()
+    + (ROOT / "architecture_styles.css").read_bytes()
+    + (ROOT / "refinements.css").read_bytes()
+).hexdigest()[:10]
 DATA = json.loads((ROOT / "site-summary.json").read_text(encoding="utf-8"))
 LAB_REVISION = DATA["lab_revision"]
 UPDATED = DATA["updated_display"]
@@ -84,9 +90,9 @@ def page(title: str, filename: str, active: str, body: str, description: str) ->
   <title>{title} · V8 Fuzz Lab</title>
   <link rel="canonical" href="{canonical}">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="refinements.css">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v={ASSET_REVISION}">
+  <link rel="stylesheet" href="refinements.css?v={ASSET_REVISION}">
+  <script src="script.js?v={ASSET_REVISION}" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">본문으로 이동</a>

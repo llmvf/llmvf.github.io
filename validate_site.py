@@ -89,7 +89,8 @@ for name in PAGES:
     for target in parser.targets:
         if target.startswith(("http:", "https:", "#", "mailto:")):
             continue
-        assert (ROOT / target.split("#")[0]).exists(), (name, target)
+        local_target = target.split("#")[0].split("?")[0]
+        assert (ROOT / local_target).exists(), (name, target)
     assert "llm_variant_fuzz_agent/" not in content, name
     print(name, "OK", len(parser.targets), "links")
 
