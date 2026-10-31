@@ -68,13 +68,112 @@
 .report-links a.primary { border-width: 2px; border-color: rgba(91, 156, 45, .55); }
 .report-links.compact { grid-template-columns: repeat(3, 1fr); }
 
+.comparison-chart {
+  margin: 24px 0 34px;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+}
+
+.comparison-chart-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.15fr) minmax(280px, 2.4fr) 76px;
+  gap: 22px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .16);
+}
+
+.comparison-chart-label strong,
+.comparison-chart-label span { display: block; }
+.comparison-chart-label strong { font: 700 14px var(--mono); color: #b6f55f; }
+.comparison-chart-label span { margin-top: 5px; font-size: 12px; color: #bdc8c8; }
+
+.repeat-bars { display: grid; gap: 7px; }
+.repeat-bars > div {
+  display: grid;
+  grid-template-columns: 25px minmax(120px, 1fr) 38px;
+  gap: 8px;
+  align-items: center;
+}
+.repeat-bars span,
+.repeat-bars strong { font: 600 11px var(--mono); }
+.repeat-bars span { color: #9eaaaa; }
+.repeat-bars strong { text-align: right; color: #f5f7ef; }
+.repeat-bars i { display: block; height: 9px; background: rgba(255, 255, 255, .1); }
+.repeat-bars i b { display: block; height: 100%; background: #8dca52; }
+.comparison-median { text-align: right; }
+.comparison-median span,
+.comparison-median strong { display: block; }
+.comparison-median span { font: 500 10px var(--mono); color: #9eaaaa; text-transform: uppercase; }
+.comparison-median strong { margin-top: 3px; font: 700 23px var(--mono); color: #b6f55f; }
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 96px 0 calc(190px + 22px + 33px);
+  color: #9eaaaa;
+  font: 500 11px var(--mono);
+}
+.comparison-table { min-width: 900px; }
+.comparison-table td:first-child small { display: block; margin-top: 4px; color: #7c8787; }
+
+.stage-chart {
+  display: flex;
+  min-height: 58px;
+  margin-top: 20px;
+  overflow: hidden;
+  background: rgba(128, 128, 128, .12);
+}
+.stage-chart > span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 10px;
+  color: #101820;
+}
+.stage-chart b { font: 700 18px var(--mono); }
+.stage-chart em { overflow: hidden; font: 600 10px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+.stage-migrated { background: #a9df70; }
+.stage-historical_verified { background: #80b9c4; }
+.stage-linked { background: #e0c26a; }
+.stage-deferred { background: #d69a69; }
+.stage-excluded { background: #b6b9b4; }
+.stage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 14px 0 28px;
+  padding: 0;
+  list-style: none;
+}
+.stage-legend li { display: grid; grid-template-columns: 10px auto auto; gap: 7px; align-items: center; font-size: 12px; }
+.stage-legend i { width: 10px; height: 10px; background: currentColor; }
+.stage-legend li.stage-migrated { color: #588b2c; background: none; }
+.stage-legend li.stage-historical_verified { color: #3e808d; background: none; }
+.stage-legend li.stage-linked { color: #967820; background: none; }
+.stage-legend li.stage-deferred { color: #a05b2d; background: none; }
+.stage-legend li.stage-excluded { color: #747a72; background: none; }
+.stage-legend span { color: inherit; }
+.stage-legend strong { color: #243039; font: 600 11px var(--mono); }
+.compact-callout { margin-top: 24px; }
+.public-cve-table { min-width: 1320px; }
+
 @media (max-width: 950px) {
   .report-links.compact { grid-template-columns: 1fr; }
   .step-grid { grid-template-columns: repeat(2, 1fr); }
+  .comparison-chart-row { grid-template-columns: minmax(160px, .9fr) minmax(240px, 2fr) 66px; gap: 14px; }
+  .chart-axis { margin-left: calc(160px + 14px + 33px); margin-right: 80px; }
 }
 
 @media (max-width: 680px) {
   .step-grid { grid-template-columns: 1fr; }
   .vmx { min-width: 620px; }
   .cvenum { min-width: 850px; }
+  .comparison-chart-row { grid-template-columns: 1fr; gap: 12px; }
+  .comparison-median { display: flex; gap: 8px; align-items: baseline; justify-content: flex-end; }
+  .chart-axis { display: none; }
+  .stage-chart { min-height: 44px; }
+  .stage-chart > span { padding: 6px 4px; }
+  .stage-chart em { display: none; }
+  .stage-chart b { font-size: 14px; }
+  .public-cve-table { min-width: 1180px; }
 }
