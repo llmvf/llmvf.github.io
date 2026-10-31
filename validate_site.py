@@ -7,6 +7,8 @@ import subprocess
 from html.parser import HTMLParser
 from pathlib import Path
 
+from sync_from_lab import normalized_smoke, parse_arm_results
+
 ROOT = Path(__file__).parent
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--lab-root", type=Path, help="optional local v8-fuzz-lab checkout")
@@ -51,6 +53,15 @@ if ARGS.lab_root:
         assert match, campaign["report"]
         source_deltas = [int(value.strip()) for value in match.group(1).split(",")]
         assert source_deltas == campaign["deltas"], (campaign["id"], source_deltas, campaign["deltas"])
+        source_arms = parse_arm_results(report_text)
+        assert source_arms == campaign["arm_results"], (campaign["id"], source_arms, campaign["arm_results"])
+        assert len(source_arms) == 9, (campaign["id"], len(source_arms))
+    for case in DATA["cve_cases"]:
+        strategy_path = lab_root / "records" / f"{case['id']}-strategy.json"
+        expected_smoke = None
+        if strategy_path.exists():
+            expected_smoke = normalized_smoke(json.loads(strategy_path.read_text(encoding="utf-8")))
+        assert expected_smoke == case.get("smoke_metrics"), (case["id"], expected_smoke, case.get("smoke_metrics"))
     print("lab-source parity OK", revision[:12], len(source_ids), "CVE cases")
 
 
@@ -104,6 +115,18 @@ for case in DATA["cve_cases"]:
     detail = (ROOT / f"{case['id'].lower()}.html").read_text(encoding="utf-8")
     for key in ("id", "mechanism", "history", "mapping", "generator", "comparison"):
         assert str(case[key]) in detail, (case["id"], key)
+    assert "B0 / B1 / B2 RESULTS" in detail, case["id"]
+    for arm in ("B0", "B1", "B2"):
+        assert f">{arm}<" in detail, (case["id"], arm)
+    if case.get("smoke_metrics"):
+        assert "현재 확보된 실행 지표" in detail, case["id"]
+    else:
+        assert "정량 smoke 결과 없음" in detail, case["id"]
+    comparison = next((item for item in DATA["comparison_campaigns"] if item["id"] == case["id"]), None)
+    if comparison:
+        assert detail.count('class="arm-label arm-') == 9, case["id"]
+        for row in comparison["arm_results"]:
+            assert str(row["target_hits"]) in detail, (case["id"], row)
 timeline = (ROOT / "timeline.html").read_text(encoding="utf-8")
 assert timeline.count('class="timeline-entry"') == len(DATA["timeline"])
 assert len(DATA["timeline"]) >= 10

@@ -58,6 +58,87 @@ def signed_number(text: str) -> float:
     return float(text.replace("+", ""))
 
 
+def markdown_number(value: str) -> int | float | None:
+    cleaned = value.strip().replace(",", "").replace("%", "").replace("−", "-")
+    if not cleaned or cleaned in {"-", "—", "N/A", "n/a"}:
+        return None
+    try:
+        number = float(cleaned)
+    except ValueError:
+        return None
+    return int(number) if number.is_integer() else number
+
+
+def parse_arm_results(text: str) -> list[dict[str, object]]:
+    """Extract the per-repetition B0/B1/B2 table from a completed report."""
+    lines = text.splitlines()
+    for index, line in enumerate(lines[:-2]):
+        if not line.startswith("|") or "반복" not in line or not ("arm" in line or "실험군" in line):
+            continue
+        headers = [item.strip() for item in line.strip("|").split("|")]
+        if not re.match(r"^\s*\|?\s*:?-+", lines[index + 1]):
+            continue
+        rows: list[dict[str, object]] = []
+        for raw in lines[index + 2 :]:
+            if not raw.startswith("|"):
+                break
+            values = [item.strip() for item in raw.strip("|").split("|")]
+            if len(values) != len(headers):
+                continue
+            source = dict(zip(headers, values))
+
+            def pick(*needles: str) -> int | float | None:
+                for header, value in source.items():
+                    lowered = header.lower()
+                    if any(needle.lower() in lowered for needle in needles):
+                        return markdown_number(value)
+                return None
+
+            arm = next((value for header, value in source.items() if header.lower() in {"arm", "실험군"}), "")
+            if arm not in {"B0", "B1", "B2"}:
+                continue
+            rows.append({
+                "repetition": pick("반복"),
+                "arm": arm,
+                "target_hits": pick("목표 도달"),
+                "executions": pick("예산 실행"),
+                "interesting": pick("유의미 샘플"),
+                "corpus": pick("말뭉치"),
+                "coverage_percent": pick("커버리지"),
+                "crashes": pick("crash", "충돌"),
+                "timeouts": pick("timeout"),
+            })
+        return rows
+    return []
+
+
+def normalized_smoke(record: dict[str, object]) -> dict[str, object] | None:
+    smoke = record.get("smoke") or record.get("mutation_axis_smoke") or record.get("initial_smoke")
+    if not isinstance(smoke, dict):
+        return None
+
+    def first(*keys: str) -> object | None:
+        for key in keys:
+            if key in smoke and smoke[key] is not None:
+                return smoke[key]
+        return None
+
+    return {
+        "iterations": first("iterations", "budgeted_executions"),
+        "executions": first("overall_total_executions", "overall_total_execs", "total_execs"),
+        "valid": first("overall_valid", "valid"),
+        "interesting": first("overall_interesting", "interesting"),
+        "corpus": first("overall_corpus_size", "corpus_size", "final_corpus_size"),
+        "coverage_percent": first("overall_coverage_percent", "coverage_percent"),
+        "crashes": first("overall_crashes", "crashes", "crashed", "generator_crashed"),
+        "timeouts": first("overall_timeouts", "timeouts", "timed_out", "generator_timed_out"),
+        "invocations": first("invocations", "generator_invocations"),
+        "target_hits": first("structural_target_hits", "retained_target_hits", "target_hit_histories", "generator_interesting", "interesting"),
+        "variant_cells_observed": first("variant_cells_observed", "unique_variants", "retained_unique_variants"),
+        "variant_cells_expected": first("variant_cells_expected"),
+    }
+
+
 def parse_comparison(path: Path, case: dict[str, object], prior: dict[str, object] | None) -> dict[str, object] | None:
     text = path.read_text(encoding="utf-8")
     target = re.search(r"B2[-−]B1 목표 도달\s*차이\s*:\s*`\[([^]]+)\]`", text)
@@ -94,6 +175,7 @@ def parse_comparison(path: Path, case: dict[str, object], prior: dict[str, objec
         "tokens": tokens,
         "crashes": 0 if re.search(r"crash(?:나|와|/failure)?\s*0|crash[^\n]{0,30}없", text, re.I) else None,
         "report": path.stem,
+        "arm_results": parse_arm_results(text),
     }
 
 
@@ -170,6 +252,9 @@ def main() -> None:
         strategy = strategy_by_cve.get(case["id"])
         if strategy:
             case["generator_name"] = strategy.get("implementation", {}).get("generator", "")
+            case["smoke_metrics"] = normalized_smoke(strategy)
+        else:
+            case["smoke_metrics"] = None
 
     comparisons = discover_comparisons(lab, data)
     for comparison in comparisons:

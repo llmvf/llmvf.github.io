@@ -38,7 +38,108 @@
       },
       "tokens": 125814,
       "crashes": null,
-      "report": "CVE-2021-38003-b012-holdout-v1"
+      "report": "CVE-2021-38003-b012-holdout-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 92309,
+          "interesting": 2750,
+          "corpus": 1031,
+          "coverage_percent": 7.3,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90329,
+          "interesting": 2786,
+          "corpus": 1042,
+          "coverage_percent": 7.64,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 17,
+          "executions": 85887,
+          "interesting": 2547,
+          "corpus": 900,
+          "coverage_percent": 7.61,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 89097,
+          "interesting": 2701,
+          "corpus": 988,
+          "coverage_percent": 7.16,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 91395,
+          "interesting": 2357,
+          "corpus": 838,
+          "coverage_percent": 7.56,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 1,
+          "executions": 91237,
+          "interesting": 2682,
+          "corpus": 981,
+          "coverage_percent": 7.31,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90943,
+          "interesting": 2736,
+          "corpus": 1027,
+          "coverage_percent": 7.51,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90276,
+          "interesting": 2734,
+          "corpus": 1017,
+          "coverage_percent": 7.7,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 42,
+          "executions": 91244,
+          "interesting": 2520,
+          "corpus": 913,
+          "coverage_percent": 7.49,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2021-21225",
@@ -59,7 +160,108 @@
       },
       "tokens": 125384,
       "crashes": 0,
-      "report": "CVE-2021-21225-b012-holdout-v1"
+      "report": "CVE-2021-21225-b012-holdout-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90865,
+          "interesting": 2580,
+          "corpus": 948,
+          "coverage_percent": 7.58,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90491,
+          "interesting": 2645,
+          "corpus": 954,
+          "coverage_percent": 7.38,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 37,
+          "executions": 85139,
+          "interesting": 2537,
+          "corpus": 889,
+          "coverage_percent": 7.32,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 86552,
+          "interesting": 2641,
+          "corpus": 962,
+          "coverage_percent": 7.18,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90320,
+          "interesting": 2644,
+          "corpus": 973,
+          "coverage_percent": 7.37,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 1,
+          "executions": 90144,
+          "interesting": 2652,
+          "corpus": 933,
+          "coverage_percent": 7.65,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 91330,
+          "interesting": 2748,
+          "corpus": 990,
+          "coverage_percent": 7.56,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": 90770,
+          "interesting": 2512,
+          "corpus": 887,
+          "coverage_percent": 7.64,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 40,
+          "executions": 91814,
+          "interesting": 2541,
+          "corpus": 900,
+          "coverage_percent": 7.49,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2022-1134",
@@ -80,7 +282,108 @@
       },
       "tokens": 131384,
       "crashes": 0,
-      "report": "CVE-2022-1134-b012-holdout-v1.1"
+      "report": "CVE-2022-1134-b012-holdout-v1.1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2627,
+          "corpus": 975,
+          "coverage_percent": 7.32,
+          "crashes": 0,
+          "timeouts": 49
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2356,
+          "corpus": 840,
+          "coverage_percent": 7.59,
+          "crashes": 0,
+          "timeouts": 44
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 32,
+          "executions": null,
+          "interesting": 2539,
+          "corpus": 916,
+          "coverage_percent": 7.42,
+          "crashes": 0,
+          "timeouts": 55
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2591,
+          "corpus": 942,
+          "coverage_percent": 7.29,
+          "crashes": 0,
+          "timeouts": 72
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": null,
+          "interesting": 2702,
+          "corpus": 989,
+          "coverage_percent": 7.28,
+          "crashes": 0,
+          "timeouts": 62
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 51,
+          "executions": null,
+          "interesting": 2547,
+          "corpus": 924,
+          "coverage_percent": 7.23,
+          "crashes": 0,
+          "timeouts": 43
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2764,
+          "corpus": 1028,
+          "coverage_percent": 7.43,
+          "crashes": 0,
+          "timeouts": 85
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2572,
+          "corpus": 903,
+          "coverage_percent": 7.59,
+          "crashes": 0,
+          "timeouts": 63
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 51,
+          "executions": null,
+          "interesting": 2658,
+          "corpus": 961,
+          "coverage_percent": 7.8,
+          "crashes": 0,
+          "timeouts": 88
+        }
+      ]
     }
   ],
   "comparison_campaigns": [
@@ -103,7 +406,108 @@
       },
       "tokens": 135196,
       "crashes": null,
-      "report": "CVE-2023-4068-b012-cross-family-v1"
+      "report": "CVE-2023-4068-b012-cross-family-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90214,
+          "interesting": 2325,
+          "corpus": 941,
+          "coverage_percent": 6.56,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90135,
+          "interesting": 2237,
+          "corpus": 896,
+          "coverage_percent": 6.85,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 24,
+          "executions": 90868,
+          "interesting": 2191,
+          "corpus": 855,
+          "coverage_percent": 7.05,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90944,
+          "interesting": 2288,
+          "corpus": 909,
+          "coverage_percent": 7.03,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 1,
+          "executions": 91371,
+          "interesting": 2204,
+          "corpus": 883,
+          "coverage_percent": 7.44,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 23,
+          "executions": 92964,
+          "interesting": 2034,
+          "corpus": 748,
+          "coverage_percent": 6.49,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90633,
+          "interesting": 2244,
+          "corpus": 894,
+          "coverage_percent": 6.58,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90186,
+          "interesting": 2178,
+          "corpus": 867,
+          "coverage_percent": 7.22,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 20,
+          "executions": 90523,
+          "interesting": 2301,
+          "corpus": 902,
+          "coverage_percent": 7.34,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2023-4069",
@@ -124,7 +528,108 @@
       },
       "tokens": 138446,
       "crashes": null,
-      "report": "CVE-2023-4069-b012-full-v1"
+      "report": "CVE-2023-4069-b012-full-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 91045,
+          "interesting": 2323,
+          "corpus": 934,
+          "coverage_percent": 6.96,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": 90487,
+          "interesting": 2262,
+          "corpus": 889,
+          "coverage_percent": 6.93,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 20,
+          "executions": 90898,
+          "interesting": 2178,
+          "corpus": 851,
+          "coverage_percent": 6.9,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90149,
+          "interesting": 2285,
+          "corpus": 912,
+          "coverage_percent": 6.81,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 2,
+          "executions": 90114,
+          "interesting": 2235,
+          "corpus": 880,
+          "coverage_percent": 7.32,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 26,
+          "executions": 91670,
+          "interesting": 2166,
+          "corpus": 840,
+          "coverage_percent": 7.22,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90225,
+          "interesting": 2327,
+          "corpus": 929,
+          "coverage_percent": 6.85,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90597,
+          "interesting": 2159,
+          "corpus": 847,
+          "coverage_percent": 7.47,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 19,
+          "executions": 93644,
+          "interesting": 2206,
+          "corpus": 883,
+          "coverage_percent": 7.24,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2024-5838",
@@ -145,7 +650,108 @@
       },
       "tokens": 123951,
       "crashes": null,
-      "report": "CVE-2024-5838-b012-development-v1.1"
+      "report": "CVE-2024-5838-b012-development-v1.1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 91115,
+          "interesting": 2593,
+          "corpus": 933,
+          "coverage_percent": 7.52,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90161,
+          "interesting": 2628,
+          "corpus": 982,
+          "coverage_percent": 7.5,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 2,
+          "executions": 91453,
+          "interesting": 2694,
+          "corpus": 990,
+          "coverage_percent": 7.19,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90404,
+          "interesting": 2591,
+          "corpus": 944,
+          "coverage_percent": 7.29,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": 91501,
+          "interesting": 2601,
+          "corpus": 960,
+          "coverage_percent": 7.25,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 13,
+          "executions": 89185,
+          "interesting": 2630,
+          "corpus": 928,
+          "coverage_percent": 7.59,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90385,
+          "interesting": 2641,
+          "corpus": 978,
+          "coverage_percent": 7.48,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 93430,
+          "interesting": 2535,
+          "corpus": 916,
+          "coverage_percent": 7.53,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 20,
+          "executions": 91263,
+          "interesting": 2605,
+          "corpus": 953,
+          "coverage_percent": 7.62,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2021-38003",
@@ -166,7 +772,108 @@
       },
       "tokens": 125814,
       "crashes": null,
-      "report": "CVE-2021-38003-b012-holdout-v1"
+      "report": "CVE-2021-38003-b012-holdout-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 92309,
+          "interesting": 2750,
+          "corpus": 1031,
+          "coverage_percent": 7.3,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90329,
+          "interesting": 2786,
+          "corpus": 1042,
+          "coverage_percent": 7.64,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 17,
+          "executions": 85887,
+          "interesting": 2547,
+          "corpus": 900,
+          "coverage_percent": 7.61,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 89097,
+          "interesting": 2701,
+          "corpus": 988,
+          "coverage_percent": 7.16,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 91395,
+          "interesting": 2357,
+          "corpus": 838,
+          "coverage_percent": 7.56,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 1,
+          "executions": 91237,
+          "interesting": 2682,
+          "corpus": 981,
+          "coverage_percent": 7.31,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90943,
+          "interesting": 2736,
+          "corpus": 1027,
+          "coverage_percent": 7.51,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90276,
+          "interesting": 2734,
+          "corpus": 1017,
+          "coverage_percent": 7.7,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 42,
+          "executions": 91244,
+          "interesting": 2520,
+          "corpus": 913,
+          "coverage_percent": 7.49,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2021-21225",
@@ -187,7 +894,108 @@
       },
       "tokens": 125384,
       "crashes": 0,
-      "report": "CVE-2021-21225-b012-holdout-v1"
+      "report": "CVE-2021-21225-b012-holdout-v1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 90865,
+          "interesting": 2580,
+          "corpus": 948,
+          "coverage_percent": 7.58,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90491,
+          "interesting": 2645,
+          "corpus": 954,
+          "coverage_percent": 7.38,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 37,
+          "executions": 85139,
+          "interesting": 2537,
+          "corpus": 889,
+          "coverage_percent": 7.32,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 86552,
+          "interesting": 2641,
+          "corpus": 962,
+          "coverage_percent": 7.18,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": 90320,
+          "interesting": 2644,
+          "corpus": 973,
+          "coverage_percent": 7.37,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 1,
+          "executions": 90144,
+          "interesting": 2652,
+          "corpus": 933,
+          "coverage_percent": 7.65,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": 91330,
+          "interesting": 2748,
+          "corpus": 990,
+          "coverage_percent": 7.56,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": 90770,
+          "interesting": 2512,
+          "corpus": 887,
+          "coverage_percent": 7.64,
+          "crashes": 0,
+          "timeouts": null
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 40,
+          "executions": 91814,
+          "interesting": 2541,
+          "corpus": 900,
+          "coverage_percent": 7.49,
+          "crashes": 0,
+          "timeouts": null
+        }
+      ]
     },
     {
       "id": "CVE-2022-1134",
@@ -208,7 +1016,108 @@
       },
       "tokens": 131384,
       "crashes": 0,
-      "report": "CVE-2022-1134-b012-holdout-v1.1"
+      "report": "CVE-2022-1134-b012-holdout-v1.1",
+      "arm_results": [
+        {
+          "repetition": 1,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2627,
+          "corpus": 975,
+          "coverage_percent": 7.32,
+          "crashes": 0,
+          "timeouts": 49
+        },
+        {
+          "repetition": 1,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2356,
+          "corpus": 840,
+          "coverage_percent": 7.59,
+          "crashes": 0,
+          "timeouts": 44
+        },
+        {
+          "repetition": 1,
+          "arm": "B2",
+          "target_hits": 32,
+          "executions": null,
+          "interesting": 2539,
+          "corpus": 916,
+          "coverage_percent": 7.42,
+          "crashes": 0,
+          "timeouts": 55
+        },
+        {
+          "repetition": 2,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2591,
+          "corpus": 942,
+          "coverage_percent": 7.29,
+          "crashes": 0,
+          "timeouts": 72
+        },
+        {
+          "repetition": 2,
+          "arm": "B1",
+          "target_hits": 3,
+          "executions": null,
+          "interesting": 2702,
+          "corpus": 989,
+          "coverage_percent": 7.28,
+          "crashes": 0,
+          "timeouts": 62
+        },
+        {
+          "repetition": 2,
+          "arm": "B2",
+          "target_hits": 51,
+          "executions": null,
+          "interesting": 2547,
+          "corpus": 924,
+          "coverage_percent": 7.23,
+          "crashes": 0,
+          "timeouts": 43
+        },
+        {
+          "repetition": 3,
+          "arm": "B0",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2764,
+          "corpus": 1028,
+          "coverage_percent": 7.43,
+          "crashes": 0,
+          "timeouts": 85
+        },
+        {
+          "repetition": 3,
+          "arm": "B1",
+          "target_hits": 0,
+          "executions": null,
+          "interesting": 2572,
+          "corpus": 903,
+          "coverage_percent": 7.59,
+          "crashes": 0,
+          "timeouts": 63
+        },
+        {
+          "repetition": 3,
+          "arm": "B2",
+          "target_hits": 51,
+          "executions": null,
+          "interesting": 2658,
+          "corpus": 961,
+          "coverage_percent": 7.8,
+          "crashes": 0,
+          "timeouts": 88
+        }
+      ]
     }
   ],
   "cve_cases": [
@@ -223,7 +1132,21 @@
       "generator": "smoke 완료",
       "comparison": "공동 development campaign 포함",
       "source_role": "개발 후보",
-      "generator_name": "JSReceiverMapSideEffectGenerator"
+      "generator_name": "JSReceiverMapSideEffectGenerator",
+      "smoke_metrics": {
+        "iterations": 20020,
+        "executions": 20035,
+        "valid": 459,
+        "interesting": 363,
+        "corpus": null,
+        "coverage_percent": 5.39,
+        "crashes": 0,
+        "timeouts": 2,
+        "invocations": 28,
+        "target_hits": 24,
+        "variant_cells_observed": 11,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2022-4262",
@@ -236,7 +1159,21 @@
       "generator": "smoke 완료",
       "comparison": "공동 development campaign 포함",
       "source_role": "개발 후보",
-      "generator_name": "ParserReparseEvalScopeGenerator"
+      "generator_name": "ParserReparseEvalScopeGenerator",
+      "smoke_metrics": {
+        "iterations": 20069,
+        "executions": 20084,
+        "valid": 482,
+        "interesting": 387,
+        "corpus": 387,
+        "coverage_percent": 3.96,
+        "crashes": 0,
+        "timeouts": 1,
+        "invocations": 29,
+        "target_hits": 23,
+        "variant_cells_observed": 19,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2023-4070",
@@ -249,7 +1186,21 @@
       "generator": "smoke 완료",
       "comparison": "장기·교차계열 campaign 포함",
       "source_role": "개발 후보",
-      "generator_name": "WasmGCLiveAliasGenerator"
+      "generator_name": "WasmGCLiveAliasGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 18836,
+        "valid": 449,
+        "interesting": 365,
+        "corpus": null,
+        "coverage_percent": 4.34,
+        "crashes": 0,
+        "timeouts": 1,
+        "invocations": null,
+        "target_hits": 365,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2023-4068",
@@ -262,7 +1213,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [24, 22, 20] · 중앙값 +22",
       "source_role": "개발 후보",
-      "generator_name": "WasmGCDefaultRefFieldGenerator"
+      "generator_name": "WasmGCDefaultRefFieldGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 18459,
+        "valid": 452,
+        "interesting": 359,
+        "corpus": 358,
+        "coverage_percent": 4.39,
+        "crashes": 0,
+        "timeouts": 0,
+        "invocations": null,
+        "target_hits": 359,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2024-0519",
@@ -274,7 +1239,8 @@
       "mapping": "미실행",
       "generator": "미실행",
       "comparison": "제외",
-      "source_role": "자료 부족"
+      "source_role": "자료 부족",
+      "smoke_metrics": null
     },
     {
       "id": "CVE-2020-16040",
@@ -287,7 +1253,21 @@
       "generator": "smoke 완료",
       "comparison": "후속 paired 비교 대기",
       "source_role": "개발 후보(5번째 migrated)",
-      "generator_name": "SimplifiedLoweringTruncationGenerator"
+      "generator_name": "SimplifiedLoweringTruncationGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 20432,
+        "valid": null,
+        "interesting": 163,
+        "corpus": 327,
+        "coverage_percent": 4.64,
+        "crashes": 0,
+        "timeouts": 0,
+        "invocations": 302,
+        "target_hits": 163,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2024-0517",
@@ -300,7 +1280,21 @@
       "generator": "smoke 완료",
       "comparison": "calibration pilot만 완료",
       "source_role": "개발 후보(5번째 계열)",
-      "generator_name": "MaglevAllocationFoldingGenerator"
+      "generator_name": "MaglevAllocationFoldingGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 18339,
+        "valid": null,
+        "interesting": 114,
+        "corpus": 291,
+        "coverage_percent": 4.33,
+        "crashes": 0,
+        "timeouts": 93,
+        "invocations": 298,
+        "target_hits": 114,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2024-5838",
@@ -313,7 +1307,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [2, 10, 20] · 중앙값 +10",
       "source_role": "개발 후보(2024 Wasm/JS 경계)",
-      "generator_name": "WasmImportWrapperJSPIGenerator"
+      "generator_name": "WasmImportWrapperJSPIGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 18817,
+        "valid": 456,
+        "interesting": 353,
+        "corpus": 352,
+        "coverage_percent": 5.48,
+        "crashes": 0,
+        "timeouts": 3,
+        "invocations": 69,
+        "target_hits": 37,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2023-3420",
@@ -325,7 +1333,8 @@
       "mapping": "present_refactored",
       "generator": "방출 smoke 완료",
       "comparison": "paired 비교 미실행",
-      "source_role": "개발(dev)"
+      "source_role": "개발(dev)",
+      "smoke_metrics": null
     },
     {
       "id": "CVE-2023-2033",
@@ -338,7 +1347,21 @@
       "generator": "smoke 완료 · target 172",
       "comparison": "B0/B1/B2 v1 동결 · 실행 대기",
       "source_role": "개발 후보(Error stack/global proxy)",
-      "generator_name": "ErrorStackGlobalCaptureGenerator"
+      "generator_name": "ErrorStackGlobalCaptureGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 17458,
+        "valid": 448,
+        "interesting": 346,
+        "corpus": 346,
+        "coverage_percent": 5.33,
+        "crashes": 0,
+        "timeouts": 1,
+        "invocations": 417,
+        "target_hits": 172,
+        "variant_cells_observed": 27,
+        "variant_cells_expected": 27
+      }
     },
     {
       "id": "CVE-2023-4069",
@@ -351,7 +1374,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [17, 24, 19] · 중앙값 +19 · transfer [3,5,5] · rollback 완료",
       "source_role": "**holdout**(Maglev 전이평가)",
-      "generator_name": "MaglevInitialMapValidityGenerator"
+      "generator_name": "MaglevInitialMapValidityGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 21052,
+        "valid": 464,
+        "interesting": 326,
+        "corpus": null,
+        "coverage_percent": 4.7,
+        "crashes": 0,
+        "timeouts": 1,
+        "invocations": 283,
+        "target_hits": 146,
+        "variant_cells_observed": null,
+        "variant_cells_expected": null
+      }
     },
     {
       "id": "CVE-2021-38003",
@@ -364,7 +1401,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [17, 1, 42] · 중앙값 +17",
       "source_role": "**external holdout**(runtime 계열)",
-      "generator_name": "JSONStringifyExceptionPathGenerator"
+      "generator_name": "JSONStringifyExceptionPathGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 19077,
+        "valid": 457,
+        "interesting": 343,
+        "corpus": 342,
+        "coverage_percent": 4.6,
+        "crashes": 0,
+        "timeouts": 1,
+        "invocations": 752,
+        "target_hits": 264,
+        "variant_cells_observed": 27,
+        "variant_cells_expected": 27
+      }
     },
     {
       "id": "CVE-2021-21225",
@@ -377,7 +1428,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [37, 1, 37] · 중앙값 +37",
       "source_role": "**external holdout**(Array/typed-array 계열)",
-      "generator_name": "ArrayConcatSpeciesSideEffectGenerator"
+      "generator_name": "ArrayConcatSpeciesSideEffectGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 19121,
+        "valid": 454,
+        "interesting": 345,
+        "corpus": 343,
+        "coverage_percent": 5.75,
+        "crashes": 0,
+        "timeouts": 3,
+        "invocations": 761,
+        "target_hits": 262,
+        "variant_cells_observed": 27,
+        "variant_cells_expected": 27
+      }
     },
     {
       "id": "CVE-2022-1134",
@@ -390,7 +1455,21 @@
       "generator": "smoke 완료",
       "comparison": "B2−B1 [32, 48, 51] · 중앙값 +48",
       "source_role": "**external holdout**(super IC/API getter 계열)",
-      "generator_name": "SuperICApiGetterGenerator"
+      "generator_name": "SuperICApiGetterGenerator",
+      "smoke_metrics": {
+        "iterations": 500,
+        "executions": 18295,
+        "valid": 456,
+        "interesting": 363,
+        "corpus": 361,
+        "coverage_percent": 5.5,
+        "crashes": 0,
+        "timeouts": 3,
+        "invocations": 452,
+        "target_hits": 195,
+        "variant_cells_observed": 27,
+        "variant_cells_expected": 27
+      }
     },
     {
       "id": "CVE-2024-3832",
@@ -402,7 +1481,8 @@
       "mapping": "surface retired",
       "generator": "비적용",
       "comparison": "CVE campaign 비적용",
-      "source_role": "**external holdout**(Wasm JSPI 객체 선택)"
+      "source_role": "**external holdout**(Wasm JSPI 객체 선택)",
+      "smoke_metrics": null
     },
     {
       "id": "CVE-2024-3833",
@@ -414,7 +1494,8 @@
       "mapping": "surface retired",
       "generator": "비적용",
       "comparison": "3832 sibling cluster",
-      "source_role": "**external holdout**(Wasm type-reflection 충돌)"
+      "source_role": "**external holdout**(Wasm type-reflection 충돌)",
+      "smoke_metrics": null
     },
     {
       "id": "CVE-2022-1096",
@@ -426,7 +1507,8 @@
       "mapping": "Blink lane 필요",
       "generator": "보류",
       "comparison": "Blink replay 확보 전 보류",
-      "source_role": "**external holdout**(Blink interceptor 경계)"
+      "source_role": "**external holdout**(Blink interceptor 경계)",
+      "smoke_metrics": null
     }
   ],
   "timeline": [

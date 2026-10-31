@@ -29,6 +29,27 @@ def delta_list(values: list[int]) -> str:
     return "[" + ", ".join(str(value) for value in values) + "]"
 
 
+def metric_value(value: object, suffix: str = "") -> str:
+    if value is None:
+        return "—"
+    if isinstance(value, float):
+        rendered = f"{value:.2f}".rstrip("0").rstrip(".")
+    elif isinstance(value, int):
+        rendered = f"{value:,}"
+    else:
+        rendered = str(value)
+    return rendered + suffix
+
+
+def no_outcome_status(case: dict[str, object]) -> str:
+    text = " ".join(str(case.get(key, "")) for key in ("status", "mapping", "generator", "comparison")).lower()
+    if "비적용" in text or "excluded" in text or "retired" in text:
+        return "비적용"
+    if "보류" in text or "deferred" in text:
+        return "보류"
+    return "미실행"
+
+
 def page(title: str, filename: str, active: str, body: str, description: str) -> str:
     nav = [
         ("index.html", "개요"),
@@ -267,6 +288,16 @@ timeline = f'''
 
 def case_detail(case: dict[str, object]) -> str:
     comparison = COMPARISON_BY_ID.get(case["id"])
+    smoke = case.get("smoke_metrics")
+    if smoke:
+        coverage = metric_value(smoke.get("coverage_percent"), "%")
+        smoke_block = f'''
+<section class="section wrap"><div class="section-top"><div><span class="eyebrow">GENERATOR SMOKE RESULT</span><h2>현재 확보된 실행 지표</h2></div><p>이 값은 generator 방출·유효 실행·구조 도달을 확인하는 smoke 결과이며 B0/B1/B2 비교 결과와 별개입니다.</p></div><div class="stat-grid smoke-stat-grid"><article><span>예산 / iteration</span><strong>{e(metric_value(smoke.get('iterations')))}</strong><small>smoke budget</small></article><article><span>총 executions</span><strong>{e(metric_value(smoke.get('executions')))}</strong><small>전체 실행</small></article><article><span>Valid</span><strong>{e(metric_value(smoke.get('valid')))}</strong><small>유효 sample</small></article><article><span>Interesting</span><strong>{e(metric_value(smoke.get('interesting')))}</strong><small>Fuzzilli counter</small></article><article><span>Corpus</span><strong>{e(metric_value(smoke.get('corpus')))}</strong><small>최종 말뭉치</small></article><article><span>Coverage</span><strong>{e(coverage)}</strong><small>관찰 범위</small></article><article><span>Target hit / invocation</span><strong>{e(metric_value(smoke.get('target_hits')))} / {e(metric_value(smoke.get('invocations')))}</strong><small>generator-scoped</small></article><article><span>Crash / timeout</span><strong>{e(metric_value(smoke.get('crashes')))} / {e(metric_value(smoke.get('timeouts')))}</strong><small>관찰된 smoke</small></article></div></section>
+'''
+    else:
+        smoke_block = f'''
+<section class="section wrap"><div class="result-callout"><span>GENERATOR SMOKE RESULT</span><h3>정량 smoke 결과 없음</h3><p>{e(case['generator'])}. 현재 공개 근거에 구조화된 smoke 지표가 없으므로 값을 추정하지 않습니다.</p></div></section>
+'''
     if comparison:
         maximum = max(comparison["deltas"]) or 1
         repeat_rows = "".join(
@@ -274,16 +305,36 @@ def case_detail(case: dict[str, object]) -> str:
             for index, value in enumerate(comparison["deltas"], start=1)
         )
         metrics = comparison["general_metrics"]
+        arm_rows = "".join(
+            "<tr>"
+            f"<td>R{e(row['repetition'])}</td>"
+            f"<td><strong class=\"arm-label arm-{e(row['arm'].lower())}\">{e(row['arm'])}</strong></td>"
+            f"<td>{e(metric_value(row.get('target_hits')))}</td>"
+            f"<td>{e(metric_value(row.get('executions')))}</td>"
+            f"<td>{e(metric_value(row.get('interesting')))}</td>"
+            f"<td>{e(metric_value(row.get('corpus')))}</td>"
+            f"<td>{e(metric_value(row.get('coverage_percent'), '%'))}</td>"
+            f"<td>{e(metric_value(row.get('crashes')))}</td>"
+            f"<td>{e(metric_value(row.get('timeouts')))}</td>"
+            "</tr>"
+            for row in comparison.get("arm_results", [])
+        )
         comparison_block = f'''
-<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">PAIRED OUTCOME</span><h2>B2−B1 target hit</h2></div><p>{e(comparison['role'])} · {e(comparison['report'])}</p></div><div class="case-repeat-chart" role="img" aria-label="{e(case['id'])} B2 빼기 B1 target hit {e(delta_list(comparison['deltas']))}">{repeat_rows}</div><div class="stat-grid"><article><span>중앙 target delta</span><strong>+{e(comparison['median'])}</strong><small>{e(delta_list(comparison['deltas']))}</small></article><article><span>Interesting 중앙값</span><strong>{e(format_signed(metrics['interesting'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Corpus 중앙값</span><strong>{e(format_signed(metrics['corpus'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Coverage 중앙값</span><strong>{e(format_signed(metrics['coverage_pp'], 2, '%p'))}</strong><small>B2−B1</small></article></div></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">B0 / B1 / B2 RESULTS</span><h2>Arm별 실행 지표</h2></div><p>{e(comparison['role'])} · {e(comparison['report'])}</p></div><div class="result-table-wrap" tabindex="0" aria-label="{e(case['id'])} B0 B1 B2 반복별 결과표, 작은 화면에서는 가로로 스크롤"><table class="arm-result-table"><thead><tr><th>반복</th><th>arm</th><th>Target hit</th><th>Executions</th><th>Interesting</th><th>Corpus</th><th>Coverage</th><th>Crash</th><th>Timeout</th></tr></thead><tbody>{arm_rows}</tbody></table></div><div class="paired-summary"><div class="section-top"><div><span class="eyebrow">PAIRED OUTCOME</span><h2>B2−B1 target hit</h2></div><p>같은 반복의 B2와 B1을 짝지어 계산합니다.</p></div><div class="case-repeat-chart" role="img" aria-label="{e(case['id'])} B2 빼기 B1 target hit {e(delta_list(comparison['deltas']))}">{repeat_rows}</div><div class="stat-grid"><article><span>중앙 target delta</span><strong>+{e(comparison['median'])}</strong><small>{e(delta_list(comparison['deltas']))}</small></article><article><span>Interesting 중앙값</span><strong>{e(format_signed(metrics['interesting'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Corpus 중앙값</span><strong>{e(format_signed(metrics['corpus'], 0, ''))}</strong><small>B2−B1</small></article><article><span>Coverage 중앙값</span><strong>{e(format_signed(metrics['coverage_pp'], 2, '%p'))}</strong><small>B2−B1</small></article></div></div></div></section>
 '''
     else:
+        status = no_outcome_status(case)
+        pending_rows = "".join(
+            f'<tr><td><strong class="arm-label arm-{arm.lower()}">{arm}</strong></td><td>{e(status)}</td><td colspan="7">{e(case["comparison"])}</td></tr>'
+            for arm in ("B0", "B1", "B2")
+        )
         comparison_block = f'''
-<section class="section section-ink"><div class="wrap"><div class="result-callout"><span>PAIRED OUTCOME</span><h3>{e(case['comparison'])}</h3><p>아직 완료된 paired outcome이 없거나 현재 surface·실행 전제 때문에 CVE campaign이 비적용·보류 상태입니다.</p></div></div></section>
+<section class="section section-ink"><div class="wrap"><div class="section-top"><div><span class="eyebrow">B0 / B1 / B2 RESULTS</span><h2>Arm별 실행 상태</h2></div><p>값이 없는 arm은 0이 아니라 미실행·보류·비적용입니다.</p></div><div class="result-table-wrap" tabindex="0" aria-label="{e(case['id'])} B0 B1 B2 실행 상태표"><table class="arm-result-table arm-status-table"><thead><tr><th>arm</th><th>상태</th><th colspan="7">근거</th></tr></thead><tbody>{pending_rows}</tbody></table></div></div></section>
 '''
     return f'''
 <section class="page-hero wrap"><span class="eyebrow">CVE CASE / {e(case['status']).upper()}</span><h1>{e(case['id'])}<br><em>{e(case['mechanism'])}.</em></h1><p>{e(case['role'])} 증거 집단의 case입니다. 각 단계의 완료·미실행·비적용 상태를 분리해 표시합니다.</p><div class="actions"><a class="button secondary" href="reports.html">전체 CVE로 돌아가기 <span>←</span></a><a class="button secondary" href="performance.html#all-paired-campaigns">비교 그래프 보기 <span>→</span></a></div></section>
 <section class="section wrap"><div class="section-top"><div><span class="eyebrow">EVIDENCE GATES</span><h2>현재 증거 상태</h2></div></div><div class="evidence-grid"><article><span>01 · 역사 재현</span><h3>{e(case['history'])}</h3><p>공개 입력 또는 제한된 authored oracle로 parent/fix 경계를 평가한 상태입니다.</p></article><article><span>02 · Current mapping</span><h3>{e(case['mapping'])}</h3><p>현재 V8에 남은 불변식·표면과 실행 도달 여부입니다.</p></article><article><span>03 · Generator</span><h3>{e(case['generator'])}</h3><p>Fuzzilli 전략의 방출·유효 실행·구조 hit 검증 상태입니다.</p></article><article><span>04 · 비교 / 처분</span><h3>{e(case['comparison'])}</h3><p>완료된 B0/B1/B2 outcome 또는 비적용·보류 근거입니다.</p></article></div></section>
+{smoke_block}
 {comparison_block}
 <section class="source-note wrap"><strong>Provenance</strong><p>근거 기준 <code>{LAB_REVISION[:12]}</code>. 원본 분석은 권한 보유자가 <a href="https://github.com/llmvf/v8-fuzz-lab/tree/main/cve/{e(case['id'])}">{e(case['id'])} 연구 폴더</a>에서 확인할 수 있습니다. Target hit과 smoke는 live vulnerability 또는 신규 버그 주장이 아닙니다.</p></section>
 '''
@@ -357,14 +408,14 @@ Static GitHub Pages site at https://llmvf.github.io/. It summarizes the current 
 ## Content baseline
 
 - Lab revision: `{LAB_REVISION}` ({DATA['updated']})
-- Public metrics and case rows: `site-summary.json` (revision, completed comparison values, general metrics, tokens, and timeline are refreshed by `sync_from_lab.py`)
+- Public metrics and case rows: `site-summary.json` (revision, normalized smoke metrics, per-repetition B0/B1/B2 arm results, comparison values, tokens, and timeline are refreshed by `sync_from_lab.py`)
 - Core sources: lab `README.md`, `architecture/workflow.md`, `architecture/integration.md`, `experiments/protocol.md`, and the named files in `experiments/results/`.
 - Experiment totals are kept per campaign. A historical replay, generator smoke, target hit, or coverage observation must not be presented as a new vulnerability finding.
 - The lab repository and raw artifacts may be private. This site publishes curated summaries only.
 
 ## Updating
 
-Update editorial case labels when a new CVE appears, then run `py -3 sync_from_lab.py --lab-root <path-to-v8-fuzz-lab>`, `py -3 build_site.py`, and `py -3 validate_site.py --lab-root <path-to-v8-fuzz-lab>`. The sync step discovers completed non-aborted `CVE-*-b012-*.md` reports and extracts target deltas, general metrics, tokens, generator count, revision, and milestone dates. Validation fails on stale revisions, missing CVEs, or mismatched report values. Commit the generated HTML, CSS, JavaScript, sitemap, robots file, and images with the source changes. GitHub Pages serves the repository root without a build dependency.
+Update editorial case labels when a new CVE appears, then run `py -3 sync_from_lab.py --lab-root <path-to-v8-fuzz-lab>`, `py -3 build_site.py`, and `py -3 validate_site.py --lab-root <path-to-v8-fuzz-lab>`. The sync step discovers completed non-aborted `CVE-*-b012-*.md` reports, extracts every repetition's B0/B1/B2 target, execution, interesting, corpus, coverage, crash, and timeout values, and normalizes the latest strategy smoke record. Validation fails on stale revisions, missing CVEs, or mismatched report and arm values. Commit the generated HTML, CSS, JavaScript, sitemap, robots file, and images with the source changes. GitHub Pages serves the repository root without a build dependency.
 
 The old `/llm_variant_fuzz_agent/` route redirects to the new results page for existing links.
 ''', encoding="utf-8")
