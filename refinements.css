@@ -1,0 +1,80 @@
+/* Public report, responsive table, and keyboard-accessibility refinements. */
+:focus-visible {
+  outline: 3px solid #6aa83a;
+  outline-offset: 3px;
+}
+
+.step-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.vmx,
+.cvenum {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.vmx { min-width: 700px; }
+.cvenum { min-width: 940px; }
+
+.vmx th,
+.vmx td {
+  padding: 10px 12px;
+  text-align: center;
+  border: 1px solid rgba(128, 128, 128, .28);
+}
+
+.vmx th:first-child,
+.vmx td:first-child,
+.vmx td:last-child { text-align: left; }
+.vmx .pos { background: rgba(40, 160, 90, .16); color: #1b7a44; font-weight: 700; }
+.vmx .def { color: #6f7878; font-style: italic; }
+
+.cvenum th,
+.cvenum td {
+  padding: 11px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(128, 128, 128, .25);
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.cvenum th { font: 500 11px var(--mono); letter-spacing: .03em; }
+.cvenum code { font-size: .85em; }
+.section-ink .vmx .pos { color: #9ee66e; }
+.section-ink .vmx .def { color: #bdc8c8; }
+.result-table-wrap { scrollbar-color: #708a75 transparent; }
+.result-table-wrap:focus-visible { outline-offset: 5px; }
+
+.report-links {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.report-links a {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid rgba(128, 128, 128, .3);
+  border-radius: 10px;
+  color: inherit;
+}
+
+.report-links a:hover { border-color: #5b9c2d; background: rgba(91, 156, 45, .06); }
+.report-links a .ext { float: right; opacity: .65; }
+.report-links a small { display: block; opacity: .72; margin-top: 4px; }
+.report-links a.primary { border-width: 2px; border-color: rgba(91, 156, 45, .55); }
+.report-links.compact { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 950px) {
+  .report-links.compact { grid-template-columns: 1fr; }
+  .step-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+  .step-grid { grid-template-columns: 1fr; }
+  .vmx { min-width: 620px; }
+  .cvenum { min-width: 850px; }
+}
